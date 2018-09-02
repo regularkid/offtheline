@@ -6,19 +6,6 @@ class Player
         this.y = 0;
         this.boxSize = 10;
         this.speed = 200;
-        // this.jumpVel = 10;
-        // this.gravity = -60;
-        // this.minJumpHoldTime = 0.05;
-        // this.maxJumpHoldTime = 0.15;
-        // this.isJumping = false;
-        // this.jumpTime = 0;
-        // this.yVel = 0;
-        // this.angle = 0;
-        // this.jumpRotPerSec = 360;
-        // this.lastLeftButtonClickedDeltaTime = 0;
-        // this.maxButtonClickLookBackTime = 0.1;
-        // this.isDoubleJump = false;
-
         this.maxButtonClickLookBackTime = 0.2;
         this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
         this.curLineDist = 0;
@@ -60,46 +47,6 @@ class Player
 
             this.curState = this.jumpingUpdate;
         }
-
-        // this.lastLeftButtonClickedDeltaTime += deltaTime;
-        // if (aw.mouseLeftButtonJustPressed)
-        // {
-        //     this.lastLeftButtonClickedDeltaTime = 0;
-        //     if (this.isJumping && !this.isDoubleJump)// && this.yVel < 3.0)
-        //     {
-        //         this.isDoubleJump = true;
-        //         this.jumpTime = 0;
-        //         this.jumpRotPerSec = 720;
-        //     }
-        // }
-
-        // if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime || this.isJumping)
-        // {
-        //     this.isJumping = true;
-        //     this.jumpTime += deltaTime;
-        //     if ((aw.mouseLeftButton && this.jumpTime <= this.maxJumpHoldTime) || this.jumpTime <= this.minJumpHoldTime)
-        //     {
-        //         this.yVel = this.jumpVel;
-        //     }
-        //     else
-        //     {
-        //         this.yVel += this.gravity*deltaTime;
-        //     }
-
-        //     this.angle -= (this.jumpRotPerSec * Math.PI/180) * deltaTime;
-        // }
-
-        // this.y += this.yVel;
-        // if (this.isJumping &&this.y <= 0.0)
-        // {
-        //     this.y = 0;
-        //     this.yVel = 0;
-        //     this.isJumping = false;
-        //     this.jumpTime = 0;
-        //     this.angle = 0;
-        //     this.isDoubleJump = false;
-        //     this.jumpRotPerSec = 360;
-        // }
     }
 
     jumpingUpdate(deltaTime)
@@ -141,13 +88,6 @@ class Player
         aw.ctx.beginPath();
         aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
         aw.ctx.stroke();
-
-        // let posInfo = level.getPosInfo(this.curLineDist);
-        // aw.ctx.beginPath();
-        // aw.ctx.moveTo(0, 0);
-        // aw.ctx.lineTo(posInfo.nx*50, posInfo.ny*50);
-        // aw.ctx.stroke();
-
         aw.ctx.restore();
     }
 }

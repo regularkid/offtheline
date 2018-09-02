@@ -11,7 +11,6 @@ function init()
     aw.state = playing;
     
     level = new Level();
-    //aw.addEntity(new Line());
     aw.addEntity(level);
     aw.addEntity(new Player());
 
