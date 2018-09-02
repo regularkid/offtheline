@@ -83,7 +83,7 @@ class Aw
         let deltaTime = Math.min((curTime - (this.lastTime || curTime)) / 1000.0, 0.2);  // Cap to 200ms (5fps)
         this.lastTime = curTime;
 
-        this.ctx.clearRect(0, 0, this.width, this.height);
+        this.ctx.clearRect(-this.width, -this.height, this.width*2.0, this.height*2.0);
 
         if (this.state !== undefined)
         {
