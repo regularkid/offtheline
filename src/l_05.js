@@ -7,11 +7,14 @@ class L05 extends Level
         this.linePoints[0].push({x:0, y:200});
         this.linePoints[0].push({x:200, y:0});
         this.linePoints[0].push({x:0, y:-200});
+
+        this.levelTime = 12.0;
+        this.timer = this.levelTime;
     }
 
     addItems()
     {
-        aw.addEntity(new Wall(0, 0, 260, 0, 40));
+        aw.addEntity(new Wall(0, 0, 250, 0, 40));
 
         aw.addEntity(new Coin(0, 120));
         aw.addEntity(new Coin(30, 90));

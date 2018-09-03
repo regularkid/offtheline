@@ -7,8 +7,9 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 6;
+var levelIdx = 0;
 var endLevelTime = 0;
+var lives = 5;
 let levelClassMap =
 {
     L01: L01,
@@ -70,7 +71,11 @@ function playing(deltaTime)
         endLevelTime -= deltaTime;
         if (endLevelTime <= 0.0)
         {
-            if (player.isDead)
+            if (lives === 0)
+            {
+                aw.state = gameOver;
+            }
+            else if (player.isDead)
             {
                 initLevel(levelIdx);
             }
@@ -81,6 +86,8 @@ function playing(deltaTime)
             }
         }
     }
+
+    drawUI();
 }
 
 function initLevel(idx)
@@ -118,4 +125,66 @@ function initLevel(idx)
     aw.addEntity(level);
 
     endLevelTime = 0.5;
+}
+
+function drawUI()
+{
+    aw.ctx.save();
+    aw.ctx.resetTransform();
+
+    // Timer
+    let xStart = 10;
+    let yStart = 10;
+    aw.ctx.fillStyle = "#FFF";
+    aw.ctx.fillRect(xStart, yStart, (level.timer / level.levelTime)*(screenWidth - 20), 20);
+
+    // Level #
+    aw.ctx.shadowColor = "#FFF";
+    aw.drawText({text:`Level ${(levelIdx + 1)}`, x:10, y:screenHeight - 5, fontSize:24, fontStyle:"bold"});
+
+    // Lives
+    for (let i = 0; i < 5; i++)
+    {
+        if (i < lives)
+        {
+            aw.ctx.lineWidth = 3;
+            aw.ctx.strokeStyle = "#08F";
+            aw.ctx.shadowColor = "#08F";
+            aw.ctx.save();
+            aw.ctx.translate(540 + i*20, screenHeight - 18);
+            aw.ctx.beginPath();
+            let boxSize = 10;
+            aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
+            aw.ctx.stroke();
+            aw.ctx.restore();
+        }
+        else
+        {
+            aw.ctx.shadowColor = "#F00";
+            aw.drawText({text:"x", x:540 + i*18, y:screenHeight - 7, fontSize:24, fontStyle:"bold", color:"#F00"});
+        }
+    }
+
+    // Game over
+    if (lives === 0)
+    {
+        aw.ctx.shadowColor = "#F00";
+        aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
+    }
+
+    aw.ctx.restore();
+}
+
+function gameOver(deltaTime)
+{
+    if (aw.mouseLeftButtonJustPressed)
+    {
+        lives = 5;
+        levelIdx = 0;
+        initLevel(levelIdx);
+        aw.mouseLeftButtonJustPressed = false;
+        aw.state = playing;
+    }
+
+    drawUI();
 }

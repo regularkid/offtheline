@@ -6,7 +6,7 @@ class Level
         this.segLengths = [];
         this.totalDistance = [];
         this.normals = [];
-        this.levelTime = 10.0;
+        this.levelTime = 7.0;
         this.timer = this.levelTime;
 
         this.addPoints();
@@ -75,12 +75,6 @@ class Level
             aw.ctx.lineTo(this.linePoints[group][0].x, this.linePoints[group][0].y);
             aw.ctx.stroke();
         }
-
-        // Timer
-        let xStart = (-screenWidth * 0.5) + 10;
-        let yStart = (screenHeight * 0.5) - 30;
-        aw.ctx.fillStyle = "#FFF";
-        aw.ctx.fillRect(xStart, yStart, (this.timer / this.levelTime)*(screenWidth - 20), 20);
     }
 
     getStartPos()

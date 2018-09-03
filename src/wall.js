@@ -19,15 +19,6 @@ class Wall
             this.angle += this.rotSpeed*deltaTime;
             this.updateEndPoints();
         }
-
-        if (player.isJumping)
-        {
-            let lineIntersectInfo = getLineIntersectionInfo(player.xPrev, player.yPrev, player.x, player.y, this.x1, this.y1, this.x2, this.y2);
-            if (lineIntersectInfo.intersect)
-            {
-                player.hit();
-            }
-        }
     }
 
     updateEndPoints()

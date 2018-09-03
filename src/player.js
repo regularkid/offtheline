@@ -55,14 +55,6 @@ class Player
         if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
         {
             this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
-
-            // let dx = (aw.mousePos.x - screenWidth*0.5) - this.x;
-            // let dy = ((screenHeight - aw.mousePos.y) - screenHeight*0.5) - this.y;
-            // let dist = Math.sqrt((dx*dx) + (dy*dy));
-            // dx /= dist;
-            // dy /= dist;
-            // this.jumpVel = {x:dx * this.jumpSpeed, y:dy * this.jumpSpeed};
-
             this.speed = -this.speed;
 
             this.isJumping = true;
@@ -75,24 +67,61 @@ class Player
         this.x += this.jumpVel.x * deltaTime;
         this.y += this.jumpVel.y * deltaTime;
 
-        let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
-        if (intersectInfo.intersect && Math.abs(this.curLineDist - intersectInfo.distance) > 1.0)
+        // Check for death
+        aw.entities.forEach(entity =>
         {
-            this.curLineDist = intersectInfo.distance;
-            this.curLevelGroup = intersectInfo.group;
-            let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
-            this.x = posInfo.x;
-            this.y = posInfo.y;
-            this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
+            if (entity instanceof Wall)
+            {
+                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
+                if (lineIntersectInfo.intersect)
+                {
+                    this.hit();
+                }
+            }
+        });
+        
+        // Off screen?
+        if (this.x < -screenWidth*0.5 - this.boxSize || this.x > screenWidth*0.5 + this.boxSize ||
+            this.y < -screenHeight*0.5 - this.boxSize || this.y > screenHeight*0.5 + this.boxSize)
+        {
+            this.hit();
+        }
 
-            this.isJumping = false;
-            this.curState = this.onLineUpdate;
-        }
-        else if (this.x < -screenWidth*0.5 - this.boxSize || this.x > screenWidth*0.5 + this.boxSize ||
-                 this.y < -screenHeight*0.5 - this.boxSize || this.y > screenHeight*0.5 + this.boxSize)
+        if (!this.isDead)
         {
-            this.isDead = true;
+            // Check for hitting coins
+            aw.entities.forEach(entity =>
+            {
+                if (entity instanceof Coin)
+                {
+                    let distToPlayer = distanceToLine(entity.x, entity.y, this.xPrev, this.yPrev, this.x, this.y);
+                    if (distToPlayer <= entity.hitSize)
+                    {
+                        entity.hit();
+                    }
+                }
+            });
+
+            // Check for hitting level again
+            let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
+            if (intersectInfo.intersect && (intersectInfo.group !== this.curLevelGroup || Math.abs(this.curLineDist - intersectInfo.distance) > 1.0))
+            {
+                this.curLineDist = intersectInfo.distance;
+                this.curLevelGroup = intersectInfo.group;
+                let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
+                this.x = posInfo.x;
+                this.y = posInfo.y;
+                this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
+
+                this.isJumping = false;
+                this.curState = this.onLineUpdate;
+            }
         }
+    }
+
+    deadUpdate()
+    {
+
     }
 
     render()
@@ -118,6 +147,8 @@ class Player
 
     hit()
     {
+        lives = Math.max(lives - 1, 0);
         this.isDead = true;
+        this.curState = this.deadUpdate;
     }
 }

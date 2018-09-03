@@ -32,17 +32,6 @@ class Coin
                 this.offsetAngle += this.offsetRotSpeed*deltaTime;
             }
         }
-
-        if (this.active && player.isJumping)
-        {
-            let distToPlayer = distanceToLine(this.x, this.y, player.xPrev, player.yPrev, player.x, player.y);
-            if (distToPlayer <= this.hitSize)
-            {
-                this.active = false;
-
-                aw.playNote("g", 7, 0.05);
-            }
-        }
     }
 
     render()
@@ -59,6 +48,15 @@ class Coin
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
             aw.ctx.restore();
+        }
+    }
+
+    hit()
+    {
+        if (this.active)
+        {
+            this.active = false;
+            aw.playNote("g", 7, 0.05);
         }
     }
 }
