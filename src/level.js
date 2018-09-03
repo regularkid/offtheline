@@ -49,7 +49,7 @@ class Level
 
     update(deltaTime)
     {
-        if (!this.isComplete() && !player.isDead)
+        if (hardcoreMode && !this.isComplete() && !player.isDead)
         {
             this.timer = Math.max(this.timer - deltaTime, 0.0);
             if (this.timer <= 0.0)

@@ -94,6 +94,11 @@ class Aw
         this.updateEntities(deltaTime);
         this.renderEntities();
 
+        if (this.statePost !== undefined)
+        {
+            this.statePost(deltaTime);
+        }
+
         this.postUpdateInput();
     }
 

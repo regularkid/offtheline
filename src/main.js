@@ -10,6 +10,7 @@ var player;
 var levelIdx = 0;
 var endLevelTime = 0;
 var lives = 5;
+var hardcoreMode = true;
 let levelClassMap =
 {
     L01: L01,
@@ -37,6 +38,7 @@ let levelClassMap =
 function init()
 {
     aw.state = playing;
+    aw.statePost = drawUI;
 
     initLevel(levelIdx);
 
@@ -65,6 +67,14 @@ function playing(deltaTime)
     {
         initLevel(levelIdx);
     }
+    else if (aw.keysJustPressed.h)
+    {
+        hardcoreMode = !hardcoreMode;
+        if (hardcoreMode)
+        {
+            level.timer = level.levelTime;
+        }
+    }
 
     if (player.isDead || level.isComplete())
     {
@@ -92,8 +102,6 @@ function playing(deltaTime)
             }
         }
     }
-
-    drawUI();
 }
 
 function initLevel(idx)
@@ -133,20 +141,23 @@ function initLevel(idx)
     endLevelTime = 0.5;
 }
 
-function drawUI()
+function drawUI(deltaTime)
 {
     aw.ctx.save();
     aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     // Timer
-    let xStart = 10;
-    let yStart = 10;
-    aw.ctx.fillStyle = "#FFF";
-    aw.ctx.fillRect(xStart, yStart, (level.timer / level.levelTime)*(screenWidth - 20), 20);
+    if (hardcoreMode)
+    {
+        let xStart = 10;
+        let yStart = screenHeight - 30;
+        aw.ctx.fillStyle = "#FFF";
+        aw.ctx.fillRect(xStart, yStart, (level.timer / level.levelTime)*(screenWidth - 20), 20);
+    }
 
     // Level #
     aw.ctx.shadowColor = "#FFF";
-    aw.drawText({text:`Level ${(levelIdx + 1)}`, x:10, y:screenHeight - 5, fontSize:24, fontStyle:"bold"});
+    aw.drawText({text:`Level ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
 
     // Lives
     for (let i = 0; i < 5; i++)
@@ -157,7 +168,7 @@ function drawUI()
             aw.ctx.strokeStyle = "#08F";
             aw.ctx.shadowColor = "#08F";
             aw.ctx.save();
-            aw.ctx.translate(540 + i*20, screenHeight - 18);
+            aw.ctx.translate(540 + i*20, 18);
             aw.ctx.beginPath();
             let boxSize = 10;
             aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
@@ -167,13 +178,17 @@ function drawUI()
         else
         {
             aw.ctx.shadowColor = "#F00";
-            aw.drawText({text:"x", x:540 + i*18, y:screenHeight - 7, fontSize:24, fontStyle:"bold", color:"#F00"});
+            aw.drawText({text:"x", x:536 + i*19.5, y:30, fontSize:24, fontStyle:"bold", color:"#F00"});
         }
     }
 
     // Game over
     if (lives === 0)
     {
+        aw.ctx.shadowColor = "#111";
+        aw.ctx.fillStyle = "#111";
+        aw.ctx.fillRect(0, 52, screenWidth, 50);
+
         aw.ctx.shadowColor = "#F00";
         aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
     }
@@ -191,6 +206,4 @@ function gameOver(deltaTime)
         aw.mouseLeftButtonJustPressed = false;
         aw.state = playing;
     }
-
-    drawUI();
 }
