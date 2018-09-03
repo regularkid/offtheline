@@ -2,6 +2,8 @@ class Level
 {
     constructor()
     {
+        this.linePoints = [];
+
         this.addPoints();
         this.createSegments();
         this.addItems();
@@ -9,14 +11,10 @@ class Level
 
     addPoints()
     {
-        // ALL TEMP/DEBUG
-        this.linePoints = [];
-
-        // BOX
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        // this.linePoints.push({x:-100, y:100});
+        // this.linePoints.push({x:100, y: 100});
+        // this.linePoints.push({x:100, y: -100});
+        // this.linePoints.push({x:-100, y: -100});
 
         // CIRCLE
         // let numPoints = 90;
@@ -51,32 +49,10 @@ class Level
 
         this.totalDistance += segDist;
         this.segLengths.push(segDist);
-
-        // this.segLengths.push(200);
-        // this.segLengths.push(200);
-        // this.segLengths.push(200);
-        // this.segLengths.push(200);
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
-
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
-
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
     }
 
     update(deltaTime)
