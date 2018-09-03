@@ -64,6 +64,7 @@ class Level
     {
         aw.ctx.lineWidth = 2;
         aw.ctx.strokeStyle = "#FFF";
+        aw.ctx.shadowColor = "#FFF";
         aw.ctx.beginPath();
         aw.ctx.moveTo(this.linePoints[0].x, this.linePoints[0].y);
         for (let i = 1; i < this.linePoints.length; i++)

@@ -54,6 +54,7 @@ class Coin
             aw.ctx.rotate(this.angle * Math.PI/180);
             aw.ctx.lineWidth = 2;
             aw.ctx.strokeStyle = "#FF0";
+            aw.ctx.shadowColor = "#FF0";
             aw.ctx.beginPath();
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();

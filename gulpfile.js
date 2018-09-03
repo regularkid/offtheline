@@ -6,6 +6,35 @@ const zip = require("gulp-zip");
 
 var sourceFiles =
 [
+    // Game
+    "./src/math.js",
+    "./src/player.js",
+    "./src/coin.js",
+    "./src/wall.js",
+    "./src/level.js",
+
+    // Levels
+    "./src/l_01.js",
+    "./src/l_02.js",
+    "./src/l_03.js",
+    "./src/l_04.js",
+    "./src/l_05.js",
+    "./src/l_06.js",
+    "./src/l_07.js",
+    "./src/l_08.js",
+    "./src/l_09.js",
+    "./src/l_10.js",
+    "./src/l_11.js",
+    "./src/l_12.js",
+    "./src/l_13.js",
+    "./src/l_14.js",
+    "./src/l_15.js",
+    "./src/l_16.js",
+    "./src/l_17.js",
+    "./src/l_18.js",
+    "./src/l_19.js",
+    "./src/l_20.js",
+
     // Engine
     "./src/aw.js",
 

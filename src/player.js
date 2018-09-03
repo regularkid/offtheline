@@ -15,6 +15,7 @@ class Player
         this.jumpVel = {x:0, y:0};
         this.jumpSpeed = 1500;
         this.isJumping = false;
+        this.isDead = false;
     }
 
     update(deltaTime)
@@ -85,18 +86,27 @@ class Player
 
     render()
     {
-        aw.ctx.save();
-        aw.ctx.translate(this.x, this.y);
-        //aw.ctx.rotate(this.angle);
-        // if (this.curState === this.jumpingUpdate)
-        // {
-        //     aw.ctx.scale(5.0, 1.0);
-        // }
-        aw.ctx.lineWidth = 2;
-        aw.ctx.strokeStyle = "#08F";
-        aw.ctx.beginPath();
-        aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
-        aw.ctx.stroke();
-        aw.ctx.restore();
+        if (!this.isDead)
+        {
+            aw.ctx.save();
+            aw.ctx.translate(this.x, this.y);
+            //aw.ctx.rotate(this.angle);
+            // if (this.curState === this.jumpingUpdate)
+            // {
+            //     aw.ctx.scale(5.0, 1.0);
+            // }
+            aw.ctx.lineWidth = 2;
+            aw.ctx.strokeStyle = "#08F";
+            aw.ctx.shadowColor = "#08F";
+            aw.ctx.beginPath();
+            aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
+            aw.ctx.stroke();
+            aw.ctx.restore();
+        }
+    }
+
+    hit()
+    {
+        this.isDead = true;
     }
 }

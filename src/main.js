@@ -7,12 +7,29 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 2;
+var levelIdx = 3;
 let levelClassMap =
 {
     L01: L01,
     L02: L02,
     L03: L03,
+    L04: L04,
+    L05: L05,
+    L06: L06,
+    L07: L07,
+    L08: L08,
+    L09: L09,
+    L10: L10,
+    L11: L11,
+    L12: L12,
+    L13: L13,
+    L14: L14,
+    L15: L15,
+    L16: L16,
+    L17: L17,
+    L18: L18,
+    L19: L19,
+    L20: L20,
 };
 
 function init()
@@ -24,7 +41,6 @@ function init()
     aw.ctx.translate(screenWidth*0.5, screenHeight*0.5);
     aw.ctx.scale(1.0, -1.0);
     aw.ctx.shadowBlur = 10;
-    aw.ctx.shadowColor = "#08F";
 }
 
 function playing()
