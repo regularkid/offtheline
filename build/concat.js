@@ -697,31 +697,50 @@ class L08 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-250, y:-100});
+        this.linePoints[0].push({x:250, y: -100});
+        this.normals.push([]);
+        this.normals[0].push({x:0, y:1});
+        this.normals[0].push({x:0, y:1});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:-140, y:100});
+        this.linePoints[1].push({x:-110, y:100});
+        this.normals.push([]);
+        this.normals[1].push({x:0, y:-1});
+        this.normals[1].push({x:0, y:-1});
+
+        this.linePoints.push([]);
+        this.linePoints[2].push({x:140, y:100});
+        this.linePoints[2].push({x:110, y:100});
+        this.normals.push([]);
+        this.normals[2].push({x:0, y:-1});
+        this.normals[2].push({x:0, y:-1});
+
+        this.linePoints.push([]);
+        this.linePoints[3].push({x:-15, y:100});
+        this.linePoints[3].push({x:15, y:100});
+        this.normals.push([]);
+        this.normals[3].push({x:0, y:-1});
+        this.normals[3].push({x:0, y:-1});
+
+        this.levelTime = 12.0;
+        this.timer = this.levelTime;
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
-
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        aw.addEntity(new Coin(-125, -50));
+        aw.addEntity(new Coin(-125, 0));
+        aw.addEntity(new Coin(-125, 50));
 
         aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(0, 0));
+        aw.addEntity(new Coin(0, 50));
+
+        aw.addEntity(new Coin(125, -50));
+        aw.addEntity(new Coin(125, 0));
+        aw.addEntity(new Coin(125, 50));
     }
 }
 class L09 extends Level
@@ -1543,6 +1562,12 @@ function playing(deltaTime)
             else
             {
                 levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
+
+                // Give extra life on 10/20/30/etc.
+                if ((levelIdx % 10) === 0)
+                {
+                    lives = Math.min(lives + 1, 5);
+                }
                 initLevel(levelIdx);
             }
         }
@@ -1591,7 +1616,7 @@ function initLevel(idx)
 function drawUI()
 {
     aw.ctx.save();
-    aw.ctx.resetTransform();
+    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     // Timer
     let xStart = 10;

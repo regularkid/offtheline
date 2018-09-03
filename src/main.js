@@ -7,7 +7,7 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 7;
+var levelIdx = 0;
 var endLevelTime = 0;
 var lives = 5;
 let levelClassMap =
@@ -136,7 +136,7 @@ function initLevel(idx)
 function drawUI()
 {
     aw.ctx.save();
-    aw.ctx.resetTransform();
+    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     // Timer
     let xStart = 10;
