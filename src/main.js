@@ -7,7 +7,8 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 5;
+var levelIdx = 6;
+var endLevelTime = 0;
 let levelClassMap =
 {
     L01: L01,
@@ -43,7 +44,7 @@ function init()
     aw.ctx.shadowBlur = 10;
 }
 
-function playing()
+function playing(deltaTime)
 {
     if (aw.keysJustPressed.right)
     {
@@ -62,6 +63,23 @@ function playing()
     else if (aw.keysJustPressed.r)
     {
         initLevel(levelIdx);
+    }
+
+    if (player.isDead || level.isComplete())
+    {
+        endLevelTime -= deltaTime;
+        if (endLevelTime <= 0.0)
+        {
+            if (player.isDead)
+            {
+                initLevel(levelIdx);
+            }
+            else
+            {
+                levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
+                initLevel(levelIdx);
+            }
+        }
     }
 }
 
@@ -98,4 +116,6 @@ function initLevel(idx)
     else if (idx == 18) { level = new L19() }
     else if (idx == 19) { level = new L20() }
     aw.addEntity(level);
+
+    endLevelTime = 0.5;
 }

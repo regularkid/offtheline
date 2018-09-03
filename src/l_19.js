@@ -2,10 +2,11 @@ class L19 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()

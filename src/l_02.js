@@ -2,10 +2,11 @@ class L02 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-200, y:100});
-        this.linePoints.push({x:200, y: 100});
-        this.linePoints.push({x:200, y: -100});
-        this.linePoints.push({x:-200, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-200, y:100});
+        this.linePoints[0].push({x:200, y: 100});
+        this.linePoints[0].push({x:200, y: -100});
+        this.linePoints[0].push({x:-200, y: -100});
     }
 
     addItems()

@@ -7,21 +7,26 @@ class Player
         this.xPrev = 0;
         this.yPrev = 0;
         this.boxSize = 10;
-        this.speed = 300;
+        this.speed = 400;
         this.maxButtonClickLookBackTime = 0.2;
         this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
         this.curLineDist = 0;
+        this.curLevelGroup = 0;
         this.curState = this.onLineUpdate;
         this.jumpVel = {x:0, y:0};
         this.jumpSpeed = 1500;
         this.isJumping = false;
         this.isDead = false;
+        this.angle = 0;
+        this.rotSpeed = 180;
     }
 
     update(deltaTime)
     {
         this.xPrev = this.x;
         this.yPrev = this.y;
+
+        this.angle += this.rotSpeed*deltaTime;
 
         if (this.curState !== undefined)
         {
@@ -34,10 +39,10 @@ class Player
         this.curLineDist += this.speed*deltaTime;
         if (this.curLineDist < 0.0)
         {
-            this.curLineDist += level.totalDistance;
+            this.curLineDist += level.totalDistance[this.curLevelGroup];
         }
-        this.curLineDist = (this.curLineDist % level.totalDistance);
-        let posInfo = level.getPosInfo(this.curLineDist);
+        this.curLineDist = (this.curLineDist % level.totalDistance[this.curLevelGroup]);
+        let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
         this.y = posInfo.y;
 
@@ -74,13 +79,19 @@ class Player
         if (intersectInfo.intersect && Math.abs(this.curLineDist - intersectInfo.distance) > 1.0)
         {
             this.curLineDist = intersectInfo.distance;
-            let posInfo = level.getPosInfo(this.curLineDist);
+            this.curLevelGroup = intersectInfo.group;
+            let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
             this.x = posInfo.x;
             this.y = posInfo.y;
             this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
 
             this.isJumping = false;
             this.curState = this.onLineUpdate;
+        }
+        else if (this.x < -screenWidth*0.5 - this.boxSize || this.x > screenWidth*0.5 + this.boxSize ||
+                 this.y < -screenHeight*0.5 - this.boxSize || this.y > screenHeight*0.5 + this.boxSize)
+        {
+            this.isDead = true;
         }
     }
 
@@ -90,7 +101,7 @@ class Player
         {
             aw.ctx.save();
             aw.ctx.translate(this.x, this.y);
-            //aw.ctx.rotate(this.angle);
+            aw.ctx.rotate(this.angle);
             // if (this.curState === this.jumpingUpdate)
             // {
             //     aw.ctx.scale(5.0, 1.0);

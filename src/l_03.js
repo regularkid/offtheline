@@ -2,6 +2,7 @@ class L03 extends Level
 {
     addPoints()
     {
+        this.linePoints.push([]);
         let radius = 150;
         let numPoints = 90;
         let angleStep = (360 / numPoints) * Math.PI/180;
@@ -10,7 +11,7 @@ class L03 extends Level
             let angle = 360 - (i * angleStep);
             let x = Math.cos(angle) * radius;
             let y = Math.sin(angle) * radius;
-            this.linePoints.push({x:x, y:y});
+            this.linePoints[0].push({x:x, y:y});
         }
     }
 
