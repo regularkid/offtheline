@@ -7,7 +7,7 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 4;
+var levelIdx = 5;
 let levelClassMap =
 {
     L01: L01,
@@ -69,11 +69,11 @@ function initLevel(idx)
 {
     aw.clearAllEntities();
 
+    player = new Player();
+    aw.addEntity(player);
+
     idx += 1;
     let levelClassName = `L${idx < 10 ? "0" + idx : idx}`;
     level = new levelClassMap[levelClassName]();
-    player = new Player();
-
     aw.addEntity(level);
-    aw.addEntity(player);
 }

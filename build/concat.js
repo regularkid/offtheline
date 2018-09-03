@@ -514,62 +514,63 @@ class L05 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push({x:-200, y:0});
+        this.linePoints.push({x:0, y:200});
+        this.linePoints.push({x:200, y:0});
+        this.linePoints.push({x:0, y:-200});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Wall(0, 0, 260, 0, 40));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        aw.addEntity(new Coin(0, 120));
+        aw.addEntity(new Coin(30, 90));
+        aw.addEntity(new Coin(60, 60));
+        aw.addEntity(new Coin(90, 30));
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(-30, 90));
+        aw.addEntity(new Coin(-60, 60));
+        aw.addEntity(new Coin(-90, 30));
+        aw.addEntity(new Coin(-120, 0));
+
+        aw.addEntity(new Coin(-90, -30));
+        aw.addEntity(new Coin(-60, -60));
+        aw.addEntity(new Coin(-30, -90));
+        aw.addEntity(new Coin(0, -120));
+
+        aw.addEntity(new Coin(30, -90));
+        aw.addEntity(new Coin(60, -60));
+        aw.addEntity(new Coin(90, -30));
+        aw.addEntity(new Coin(120,  0));
     }
 }
 class L06 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push({x:-200, y:200});
+        this.linePoints.push({x:-50, y: 200});
+        this.linePoints.push({x:-50, y: 20});
+        this.linePoints.push({x:200, y: 20});
+
+        this.linePoints.push({x:200, y:-200});
+        this.linePoints.push({x:50, y: -200});
+        this.linePoints.push({x:50, y: -20});
+        this.linePoints.push({x:-200, y: -20});
     }
 
     addItems()
     {
         aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
-
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
-
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(-30, 0));
+        aw.addEntity(new Coin(-60, 0));
+        aw.addEntity(new Coin(30, 0));
+        aw.addEntity(new Coin(60, 0));
+        aw.addEntity(new Coin(90, 0));
+        aw.addEntity(new Coin(-90, 0));
+        aw.addEntity(new Coin(120, 0));
+        aw.addEntity(new Coin(-120, 0));
     }
 }
 class L07 extends Level
@@ -1366,7 +1367,7 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 3;
+var levelIdx = 5;
 let levelClassMap =
 {
     L01: L01,
