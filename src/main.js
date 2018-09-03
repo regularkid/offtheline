@@ -7,7 +7,7 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 0;
+var levelIdx = 7;
 var endLevelTime = 0;
 var lives = 5;
 let levelClassMap =
@@ -82,6 +82,12 @@ function playing(deltaTime)
             else
             {
                 levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
+
+                // Give extra life on 10/20/30/etc.
+                if ((levelIdx % 10) === 0)
+                {
+                    lives = Math.min(lives + 1, 5);
+                }
                 initLevel(levelIdx);
             }
         }

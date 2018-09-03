@@ -57,21 +57,26 @@ class Player
         this.xPrev = 0;
         this.yPrev = 0;
         this.boxSize = 10;
-        this.speed = 300;
+        this.speed = 400;
         this.maxButtonClickLookBackTime = 0.2;
         this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
         this.curLineDist = 0;
+        this.curLevelGroup = 0;
         this.curState = this.onLineUpdate;
         this.jumpVel = {x:0, y:0};
         this.jumpSpeed = 1500;
         this.isJumping = false;
         this.isDead = false;
+        this.angle = 0;
+        this.rotSpeed = 180;
     }
 
     update(deltaTime)
     {
         this.xPrev = this.x;
         this.yPrev = this.y;
+
+        this.angle += this.rotSpeed*deltaTime;
 
         if (this.curState !== undefined)
         {
@@ -84,10 +89,10 @@ class Player
         this.curLineDist += this.speed*deltaTime;
         if (this.curLineDist < 0.0)
         {
-            this.curLineDist += level.totalDistance;
+            this.curLineDist += level.totalDistance[this.curLevelGroup];
         }
-        this.curLineDist = (this.curLineDist % level.totalDistance);
-        let posInfo = level.getPosInfo(this.curLineDist);
+        this.curLineDist = (this.curLineDist % level.totalDistance[this.curLevelGroup]);
+        let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
         this.y = posInfo.y;
 
@@ -100,14 +105,6 @@ class Player
         if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
         {
             this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
-
-            // let dx = (aw.mousePos.x - screenWidth*0.5) - this.x;
-            // let dy = ((screenHeight - aw.mousePos.y) - screenHeight*0.5) - this.y;
-            // let dist = Math.sqrt((dx*dx) + (dy*dy));
-            // dx /= dist;
-            // dy /= dist;
-            // this.jumpVel = {x:dx * this.jumpSpeed, y:dy * this.jumpSpeed};
-
             this.speed = -this.speed;
 
             this.isJumping = true;
@@ -120,18 +117,61 @@ class Player
         this.x += this.jumpVel.x * deltaTime;
         this.y += this.jumpVel.y * deltaTime;
 
-        let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
-        if (intersectInfo.intersect && Math.abs(this.curLineDist - intersectInfo.distance) > 1.0)
+        // Check for death
+        aw.entities.forEach(entity =>
         {
-            this.curLineDist = intersectInfo.distance;
-            let posInfo = level.getPosInfo(this.curLineDist);
-            this.x = posInfo.x;
-            this.y = posInfo.y;
-            this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
-
-            this.isJumping = false;
-            this.curState = this.onLineUpdate;
+            if (entity instanceof Wall)
+            {
+                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
+                if (lineIntersectInfo.intersect)
+                {
+                    this.hit();
+                }
+            }
+        });
+        
+        // Off screen?
+        if (this.x < -screenWidth*0.5 - this.boxSize || this.x > screenWidth*0.5 + this.boxSize ||
+            this.y < -screenHeight*0.5 - this.boxSize || this.y > screenHeight*0.5 + this.boxSize)
+        {
+            this.hit();
         }
+
+        if (!this.isDead)
+        {
+            // Check for hitting coins
+            aw.entities.forEach(entity =>
+            {
+                if (entity instanceof Coin)
+                {
+                    let distToPlayer = distanceToLine(entity.x, entity.y, this.xPrev, this.yPrev, this.x, this.y);
+                    if (distToPlayer <= entity.hitSize)
+                    {
+                        entity.hit();
+                    }
+                }
+            });
+
+            // Check for hitting level again
+            let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
+            if (intersectInfo.intersect && (intersectInfo.group !== this.curLevelGroup || Math.abs(this.curLineDist - intersectInfo.distance) > 1.0))
+            {
+                this.curLineDist = intersectInfo.distance;
+                this.curLevelGroup = intersectInfo.group;
+                let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
+                this.x = posInfo.x;
+                this.y = posInfo.y;
+                this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
+
+                this.isJumping = false;
+                this.curState = this.onLineUpdate;
+            }
+        }
+    }
+
+    deadUpdate()
+    {
+
     }
 
     render()
@@ -140,7 +180,7 @@ class Player
         {
             aw.ctx.save();
             aw.ctx.translate(this.x, this.y);
-            //aw.ctx.rotate(this.angle);
+            aw.ctx.rotate(this.angle);
             // if (this.curState === this.jumpingUpdate)
             // {
             //     aw.ctx.scale(5.0, 1.0);
@@ -157,7 +197,9 @@ class Player
 
     hit()
     {
+        lives = Math.max(lives - 1, 0);
         this.isDead = true;
+        this.curState = this.deadUpdate;
     }
 }
 class Coin
@@ -194,17 +236,6 @@ class Coin
                 this.offsetAngle += this.offsetRotSpeed*deltaTime;
             }
         }
-
-        if (this.active && player.isJumping)
-        {
-            let distToPlayer = distanceToLine(this.x, this.y, player.xPrev, player.yPrev, player.x, player.y);
-            if (distToPlayer <= this.hitSize)
-            {
-                this.active = false;
-
-                aw.playNote("g", 7, 0.05);
-            }
-        }
     }
 
     render()
@@ -221,6 +252,15 @@ class Coin
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
             aw.ctx.restore();
+        }
+    }
+
+    hit()
+    {
+        if (this.active)
+        {
+            this.active = false;
+            aw.playNote("g", 7, 0.05);
         }
     }
 }
@@ -244,15 +284,6 @@ class Wall
         {
             this.angle += this.rotSpeed*deltaTime;
             this.updateEndPoints();
-        }
-
-        if (player.isJumping)
-        {
-            let lineIntersectInfo = getLineIntersectionInfo(player.xPrev, player.yPrev, player.x, player.y, this.x1, this.y1, this.x2, this.y2);
-            if (lineIntersectInfo.intersect)
-            {
-                player.hit();
-            }
         }
     }
 
@@ -284,6 +315,11 @@ class Level
     constructor()
     {
         this.linePoints = [];
+        this.segLengths = [];
+        this.totalDistance = [];
+        this.normals = [];
+        this.levelTime = 7.0;
+        this.timer = this.levelTime;
 
         this.addPoints();
         this.createSegments();
@@ -292,44 +328,31 @@ class Level
 
     addPoints()
     {
-        // this.linePoints.push({x:-100, y:100});
-        // this.linePoints.push({x:100, y: 100});
-        // this.linePoints.push({x:100, y: -100});
-        // this.linePoints.push({x:-100, y: -100});
-
-        // CIRCLE
-        // let numPoints = 90;
-        // let angleStep = 360 / numPoints;
-        // let radius = 100;
-        // for (let i = 0; i < numPoints; i++)
-        // {
-        //     let angle = (360 - (i * angleStep)) * Math.PI/180.0;
-        //     let x = Math.cos(angle) * radius;
-        //     let y = Math.sin(angle) * radius;
-        //     this.linePoints.push({x:x, y:y});
-        // }
     }
 
     createSegments()
     {
-        this.segLengths = [];
-        this.totalDistance = 0;
-        for (let i = 0; i < this.linePoints.length - 1; i++)
+        for (let group = 0; group < this.linePoints.length; group++)
         {
-            let xDist = this.linePoints[i + 1].x - this.linePoints[i].x;
-            let yDist = this.linePoints[i + 1].y - this.linePoints[i].y;
+            this.totalDistance.push(0);
+            this.segLengths.push([]);
+            for (let i = 0; i < this.linePoints[group].length - 1; i++)
+            {
+                let xDist = this.linePoints[group][i + 1].x - this.linePoints[group][i].x;
+                let yDist = this.linePoints[group][i + 1].y - this.linePoints[group][i].y;
+                let segDist = Math.sqrt((xDist*xDist) + (yDist*yDist));
+
+                this.totalDistance[group] += segDist;
+                this.segLengths[group].push(segDist);
+            }
+
+            let xDist = this.linePoints[group][0].x - this.linePoints[group][this.linePoints[group].length - 1].x;
+            let yDist = this.linePoints[group][0].y - this.linePoints[group][this.linePoints[group].length - 1].y;
             let segDist = Math.sqrt((xDist*xDist) + (yDist*yDist));
 
-            this.totalDistance += segDist;
-            this.segLengths.push(segDist);
+            this.totalDistance[group] += segDist;
+            this.segLengths[group].push(segDist);
         }
-
-        let xDist = this.linePoints[0].x - this.linePoints[this.linePoints.length - 1].x;
-        let yDist = this.linePoints[0].y - this.linePoints[this.linePoints.length - 1].y;
-        let segDist = Math.sqrt((xDist*xDist) + (yDist*yDist));
-
-        this.totalDistance += segDist;
-        this.segLengths.push(segDist);
     }
 
     addItems()
@@ -338,7 +361,14 @@ class Level
 
     update(deltaTime)
     {
-
+        if (!this.isComplete() && !player.isDead)
+        {
+            this.timer = Math.max(this.timer - deltaTime, 0.0);
+            if (this.timer <= 0.0)
+            {
+                player.hit();
+            }
+        }
     }
 
     render()
@@ -346,77 +376,109 @@ class Level
         aw.ctx.lineWidth = 2;
         aw.ctx.strokeStyle = "#FFF";
         aw.ctx.shadowColor = "#FFF";
-        aw.ctx.beginPath();
-        aw.ctx.moveTo(this.linePoints[0].x, this.linePoints[0].y);
-        for (let i = 1; i < this.linePoints.length; i++)
+        for (let group = 0; group < this.linePoints.length; group++)
         {
-            aw.ctx.lineTo(this.linePoints[i].x, this.linePoints[i].y);
+            aw.ctx.beginPath();
+            aw.ctx.moveTo(this.linePoints[group][0].x, this.linePoints[group][0].y);
+            for (let i = 1; i < this.linePoints[group].length; i++)
+            {
+                aw.ctx.lineTo(this.linePoints[group][i].x, this.linePoints[group][i].y);
+            }
+            aw.ctx.lineTo(this.linePoints[group][0].x, this.linePoints[group][0].y);
+            aw.ctx.stroke();
         }
-        aw.ctx.lineTo(this.linePoints[0].x, this.linePoints[0].y);
-        aw.ctx.stroke();
     }
 
     getStartPos()
     {
-        return this.linePoints[0];
+        return this.linePoints[0][0];
     }
 
-    getPosInfo(distance)
+    getPosInfo(group, distance)
     {
-        distance = distance % this.totalDistance;
+        distance = distance % this.totalDistance[group];
 
         let curTotalDistance = 0;
-        for (let i = 0; i < this.segLengths.length; i++)
+        for (let i = 0; i < this.segLengths[group].length; i++)
         {
-            let nextTotalDistance = curTotalDistance + this.segLengths[i];
+            let nextTotalDistance = curTotalDistance + this.segLengths[group][i];
             if (distance >= curTotalDistance && distance < nextTotalDistance)
             {
-                let ratio = (distance - curTotalDistance) / this.segLengths[i];
+                let ratio = (distance - curTotalDistance) / this.segLengths[group][i];
                 let p1 = i;
-                let p2 = (i + 1) % this.linePoints.length;
-                let xInterp = this.linePoints[p1].x + (this.linePoints[p2].x - this.linePoints[p1].x)*ratio;
-                let yInterp = this.linePoints[p1].y + (this.linePoints[p2].y - this.linePoints[p1].y)*ratio;
+                let p2 = (i + 1) % this.linePoints[group].length;
+                let xInterp = this.linePoints[group][p1].x + (this.linePoints[group][p2].x - this.linePoints[group][p1].x)*ratio;
+                let yInterp = this.linePoints[group][p1].y + (this.linePoints[group][p2].y - this.linePoints[group][p1].y)*ratio;
 
-                let xDir = (this.linePoints[p2].x - this.linePoints[p1].x) / this.segLengths[i];
-                let yDir = (this.linePoints[p2].y - this.linePoints[p1].y) / this.segLengths[i];
-                return {x:xInterp, y:yInterp, nx:yDir, ny:-xDir};
+                if (this.normals[group] !== undefined && this.normals[group][i] !== undefined)
+                {
+                    return {x:xInterp, y:yInterp, nx:this.normals[group][i].x, ny:this.normals[group][i].y};
+                }
+                else
+                {
+                    let xDir = (this.linePoints[group][p2].x - this.linePoints[group][p1].x) / this.segLengths[group][i];
+                    let yDir = (this.linePoints[group][p2].y - this.linePoints[group][p1].y) / this.segLengths[group][i];
+                    return {x:xInterp, y:yInterp, nx:yDir, ny:-xDir};
+                }
             }
 
             curTotalDistance = nextTotalDistance;
         }
 
-        return {x:this.linePoints[0].x, y:this.linePoints[0].y};
+        return {x:this.linePoints[0][0].x, y:this.linePoints[0][0].y};
     }
 
     getIntersectionInfo(x1, y1, x2, y2)
     {
-        let curTotalDistance = 0;
-        for (let i = 0; i < this.segLengths.length; i++)
+        for (let group = 0; group < this.segLengths.length; group++)
         {
-            let p1 = i;
-            let p2 = (i + 1) % this.linePoints.length;
-
-            let lineIntersectInfo = getLineIntersectionInfo(x1, y1, x2, y2, this.linePoints[p1].x, this.linePoints[p1].y, this.linePoints[p2].x, this.linePoints[p2].y);
-            if (lineIntersectInfo.intersect)
+            let curTotalDistance = 0;
+            for (let i = 0; i < this.segLengths[group].length; i++)
             {
-                lineIntersectInfo.distance = curTotalDistance + this.segLengths[i]*(1.0 - lineIntersectInfo.time);
-                return lineIntersectInfo;
-            }
+                let p1 = i;
+                let p2 = (i + 1) % this.linePoints[group].length;
 
-            curTotalDistance += this.segLengths[i];
+                let lineIntersectInfo = getLineIntersectionInfo(x1, y1, x2, y2, this.linePoints[group][p1].x, this.linePoints[group][p1].y, this.linePoints[group][p2].x, this.linePoints[group][p2].y);
+                if (lineIntersectInfo.intersect)
+                {
+                    lineIntersectInfo.distance = curTotalDistance + this.segLengths[group][i]*(1.0 - lineIntersectInfo.time);
+                    lineIntersectInfo.group = group;
+                    return lineIntersectInfo;
+                }
+
+                curTotalDistance += this.segLengths[group][i];
+            }
         }
 
         return {intersect:false};
+    }
+
+    isComplete()
+    {
+        let isComplete = true;
+        aw.entities.forEach(entity =>
+        {
+            if (entity instanceof Coin)
+            {
+                if (entity.active)
+                {
+                    isComplete = false;
+                }
+            }
+        });
+
+        return isComplete;
     }
 }
 class L01 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -444,10 +506,11 @@ class L02 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-200, y:100});
-        this.linePoints.push({x:200, y: 100});
-        this.linePoints.push({x:200, y: -100});
-        this.linePoints.push({x:-200, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-200, y:100});
+        this.linePoints[0].push({x:200, y: 100});
+        this.linePoints[0].push({x:200, y: -100});
+        this.linePoints[0].push({x:-200, y: -100});
     }
 
     addItems()
@@ -467,6 +530,7 @@ class L03 extends Level
 {
     addPoints()
     {
+        this.linePoints.push([]);
         let radius = 150;
         let numPoints = 90;
         let angleStep = (360 / numPoints) * Math.PI/180;
@@ -475,7 +539,7 @@ class L03 extends Level
             let angle = 360 - (i * angleStep);
             let x = Math.cos(angle) * radius;
             let y = Math.sin(angle) * radius;
-            this.linePoints.push({x:x, y:y});
+            this.linePoints[0].push({x:x, y:y});
         }
     }
 
@@ -492,10 +556,11 @@ class L04 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-60, y:150});
-        this.linePoints.push({x:60, y: 150});
-        this.linePoints.push({x:60, y: -150});
-        this.linePoints.push({x:-60, y: -150});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-60, y:150});
+        this.linePoints[0].push({x:60, y: 150});
+        this.linePoints[0].push({x:60, y: -150});
+        this.linePoints[0].push({x:-60, y: -150});
     }
 
     addItems()
@@ -504,25 +569,29 @@ class L04 extends Level
         aw.addEntity(new Coin(0, 50));
         aw.addEntity(new Coin(0, -50));
 
-        aw.addEntity(new Wall(-40, 25, 40, 0));
-        aw.addEntity(new Wall(40, -25, 40, 0));
-        aw.addEntity(new Wall(40, 75, 40, 0));
-        aw.addEntity(new Wall(-40, -75, 40, 0));
+        aw.addEntity(new Wall(-35, 25, 50, 0));
+        aw.addEntity(new Wall(35, -25, 50, 0));
+        aw.addEntity(new Wall(35, 75, 50, 0));
+        aw.addEntity(new Wall(-35, -75, 50, 0));
     }
 }
 class L05 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-200, y:0});
-        this.linePoints.push({x:0, y:200});
-        this.linePoints.push({x:200, y:0});
-        this.linePoints.push({x:0, y:-200});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-200, y:0});
+        this.linePoints[0].push({x:0, y:200});
+        this.linePoints[0].push({x:200, y:0});
+        this.linePoints[0].push({x:0, y:-200});
+
+        this.levelTime = 12.0;
+        this.timer = this.levelTime;
     }
 
     addItems()
     {
-        aw.addEntity(new Wall(0, 0, 260, 0, 40));
+        aw.addEntity(new Wall(0, 0, 250, 0, 40));
 
         aw.addEntity(new Coin(0, 120));
         aw.addEntity(new Coin(30, 90));
@@ -549,15 +618,16 @@ class L06 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-200, y:200});
-        this.linePoints.push({x:-50, y: 200});
-        this.linePoints.push({x:-50, y: 20});
-        this.linePoints.push({x:200, y: 20});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-200, y:200});
+        this.linePoints[0].push({x:-50, y: 200});
+        this.linePoints[0].push({x:-50, y: 20});
+        this.linePoints[0].push({x:200, y: 20});
 
-        this.linePoints.push({x:200, y:-200});
-        this.linePoints.push({x:50, y: -200});
-        this.linePoints.push({x:50, y: -20});
-        this.linePoints.push({x:-200, y: -20});
+        this.linePoints[0].push({x:200, y:-200});
+        this.linePoints[0].push({x:50, y: -200});
+        this.linePoints[0].push({x:50, y: -20});
+        this.linePoints[0].push({x:-200, y: -20});
     }
 
     addItems()
@@ -585,41 +655,52 @@ class L07 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:50, y:-100});
+        this.linePoints[0].push({x:-50, y:-100});
+        this.normals.push([]);
+        this.normals[0].push({x:0, y:1});
+        this.normals[0].push({x:0, y:1});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:-125, y:100});
+        this.linePoints[1].push({x:-25, y:100});
+        this.normals.push([]);
+        this.normals[1].push({x:0, y:-1});
+        this.normals[1].push({x:0, y:-1});
+
+        this.linePoints.push([]);
+        this.linePoints[2].push({x:125, y:100});
+        this.linePoints[2].push({x:25, y:100});
+        this.normals.push([]);
+        this.normals[2].push({x:0, y:-1});
+        this.normals[2].push({x:0, y:-1});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Coin(-35, -50));
+        aw.addEntity(new Coin(-35, -25));
+        aw.addEntity(new Coin(-35, 0));
+        aw.addEntity(new Coin(-35, 25));
+        aw.addEntity(new Coin(-35, 50));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
-
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(35, -50));
+        aw.addEntity(new Coin(35, -25));
+        aw.addEntity(new Coin(35, 0));
+        aw.addEntity(new Coin(35, 25));
+        aw.addEntity(new Coin(35, 50));
     }
 }
 class L08 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -647,10 +728,11 @@ class L09 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -678,10 +760,11 @@ class L10 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -709,10 +792,11 @@ class L11 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -740,10 +824,11 @@ class L12 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -771,10 +856,11 @@ class L13 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -802,10 +888,11 @@ class L14 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -833,10 +920,11 @@ class L15 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -864,10 +952,11 @@ class L16 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -895,10 +984,11 @@ class L17 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -926,10 +1016,11 @@ class L18 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -957,10 +1048,11 @@ class L19 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -988,10 +1080,11 @@ class L20 extends Level
 {
     addPoints()
     {
-        this.linePoints.push({x:-100, y:100});
-        this.linePoints.push({x:100, y: 100});
-        this.linePoints.push({x:100, y: -100});
-        this.linePoints.push({x:-100, y: -100});
+        this.linePoints.push([]);
+        this.linePoints[0].push({x:-100, y:100});
+        this.linePoints[0].push({x:100, y: 100});
+        this.linePoints[0].push({x:100, y: -100});
+        this.linePoints[0].push({x:-100, y: -100});
     }
 
     addItems()
@@ -1375,7 +1468,9 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 5;
+var levelIdx = 0;
+var endLevelTime = 0;
+var lives = 5;
 let levelClassMap =
 {
     L01: L01,
@@ -1411,7 +1506,7 @@ function init()
     aw.ctx.shadowBlur = 10;
 }
 
-function playing()
+function playing(deltaTime)
 {
     if (aw.keysJustPressed.right)
     {
@@ -1431,6 +1526,29 @@ function playing()
     {
         initLevel(levelIdx);
     }
+
+    if (player.isDead || level.isComplete())
+    {
+        endLevelTime -= deltaTime;
+        if (endLevelTime <= 0.0)
+        {
+            if (lives === 0)
+            {
+                aw.state = gameOver;
+            }
+            else if (player.isDead)
+            {
+                initLevel(levelIdx);
+            }
+            else
+            {
+                levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
+                initLevel(levelIdx);
+            }
+        }
+    }
+
+    drawUI();
 }
 
 function initLevel(idx)
@@ -1466,4 +1584,68 @@ function initLevel(idx)
     else if (idx == 18) { level = new L19() }
     else if (idx == 19) { level = new L20() }
     aw.addEntity(level);
+
+    endLevelTime = 0.5;
+}
+
+function drawUI()
+{
+    aw.ctx.save();
+    aw.ctx.resetTransform();
+
+    // Timer
+    let xStart = 10;
+    let yStart = 10;
+    aw.ctx.fillStyle = "#FFF";
+    aw.ctx.fillRect(xStart, yStart, (level.timer / level.levelTime)*(screenWidth - 20), 20);
+
+    // Level #
+    aw.ctx.shadowColor = "#FFF";
+    aw.drawText({text:`Level ${(levelIdx + 1)}`, x:10, y:screenHeight - 5, fontSize:24, fontStyle:"bold"});
+
+    // Lives
+    for (let i = 0; i < 5; i++)
+    {
+        if (i < lives)
+        {
+            aw.ctx.lineWidth = 3;
+            aw.ctx.strokeStyle = "#08F";
+            aw.ctx.shadowColor = "#08F";
+            aw.ctx.save();
+            aw.ctx.translate(540 + i*20, screenHeight - 18);
+            aw.ctx.beginPath();
+            let boxSize = 10;
+            aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
+            aw.ctx.stroke();
+            aw.ctx.restore();
+        }
+        else
+        {
+            aw.ctx.shadowColor = "#F00";
+            aw.drawText({text:"x", x:540 + i*18, y:screenHeight - 7, fontSize:24, fontStyle:"bold", color:"#F00"});
+        }
+    }
+
+    // Game over
+    if (lives === 0)
+    {
+        aw.ctx.shadowColor = "#F00";
+        aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
+    }
+
+    aw.ctx.restore();
+}
+
+function gameOver(deltaTime)
+{
+    if (aw.mouseLeftButtonJustPressed)
+    {
+        lives = 5;
+        levelIdx = 0;
+        initLevel(levelIdx);
+        aw.mouseLeftButtonJustPressed = false;
+        aw.state = playing;
+    }
+
+    drawUI();
 }
