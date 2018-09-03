@@ -571,6 +571,14 @@ class L06 extends Level
         aw.addEntity(new Coin(-90, 0));
         aw.addEntity(new Coin(120, 0));
         aw.addEntity(new Coin(-120, 0));
+
+        aw.addEntity(new Wall(-125, 160, 150));
+        aw.addEntity(new Wall(125, -160, 150));
+        aw.addEntity(new Coin(-125, 180));
+        aw.addEntity(new Coin(125, -180));
+
+        aw.addEntity(new Wall(-60, 40, 40, 90));
+        aw.addEntity(new Wall(60, -40, 40, 90));
     }
 }
 class L07 extends Level
@@ -1429,11 +1437,33 @@ function initLevel(idx)
 {
     aw.clearAllEntities();
 
-    idx += 1;
-    let levelClassName = `L${idx < 10 ? "0" + idx : idx}`;
-    level = new levelClassMap[levelClassName]();
     player = new Player();
-
-    aw.addEntity(level);
     aw.addEntity(player);
+
+    //idx += 1;
+    // let levelClassName = `L${idx < 10 ? "0" + idx : idx}`;
+    // level = new levelClassMap[levelClassName]();
+
+    // TEMP TO WORK AROUND CLOSURE COMPILER ISSUES
+    if (idx == 0) { level = new L01() }
+    else if (idx == 1) { level = new L02() }
+    else if (idx == 2) { level = new L03() }
+    else if (idx == 3) { level = new L04() }
+    else if (idx == 4) { level = new L05() }
+    else if (idx == 5) { level = new L06() }
+    else if (idx == 6) { level = new L07() }
+    else if (idx == 7) { level = new L08() }
+    else if (idx == 8) { level = new L09() }
+    else if (idx == 9) { level = new L10() }
+    else if (idx == 10) { level = new L11() }
+    else if (idx == 11) { level = new L12() }
+    else if (idx == 12) { level = new L13() }
+    else if (idx == 13) { level = new L14() }
+    else if (idx == 14) { level = new L15() }
+    else if (idx == 15) { level = new L16() }
+    else if (idx == 16) { level = new L17() }
+    else if (idx == 17) { level = new L18() }
+    else if (idx == 18) { level = new L19() }
+    else if (idx == 19) { level = new L20() }
+    aw.addEntity(level);
 }
