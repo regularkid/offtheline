@@ -7,7 +7,7 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 3;
+var levelIdx = 4;
 let levelClassMap =
 {
     L01: L01,
