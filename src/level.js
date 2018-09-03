@@ -6,6 +6,8 @@ class Level
         this.segLengths = [];
         this.totalDistance = [];
         this.normals = [];
+        this.levelTime = 10.0;
+        this.timer = this.levelTime;
 
         this.addPoints();
         this.createSegments();
@@ -47,7 +49,14 @@ class Level
 
     update(deltaTime)
     {
-
+        if (!this.isComplete() && !player.isDead)
+        {
+            this.timer = Math.max(this.timer - deltaTime, 0.0);
+            if (this.timer <= 0.0)
+            {
+                player.hit();
+            }
+        }
     }
 
     render()
@@ -66,6 +75,12 @@ class Level
             aw.ctx.lineTo(this.linePoints[group][0].x, this.linePoints[group][0].y);
             aw.ctx.stroke();
         }
+
+        // Timer
+        let xStart = (-screenWidth * 0.5) + 10;
+        let yStart = (screenHeight * 0.5) - 30;
+        aw.ctx.fillStyle = "#FFF";
+        aw.ctx.fillRect(xStart, yStart, (this.timer / this.levelTime)*(screenWidth - 20), 20);
     }
 
     getStartPos()
