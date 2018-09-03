@@ -6,13 +6,16 @@ var aw = new Aw(screenWidth, screenHeight, screenScale, []);
 aw.state = init;
 
 var level;
+var player;
 function init()
 {
     aw.state = playing;
     
     level = new Level();
+    player = new Player();
+
     aw.addEntity(level);
-    aw.addEntity(new Player());
+    aw.addEntity(player);
 
     aw.ctx.translate(screenWidth*0.5, screenHeight*0.5);
     aw.ctx.scale(1.0, -1.0);

@@ -4,6 +4,8 @@ class Player
     {
         this.x = 0;
         this.y = 0;
+        this.xPrev = 0;
+        this.yPrev = 0;
         this.boxSize = 10;
         this.speed = 200;
         this.maxButtonClickLookBackTime = 0.2;
@@ -12,10 +14,14 @@ class Player
         this.curState = this.onLineUpdate;
         this.jumpVel = {x:0, y:0};
         this.jumpSpeed = 1500;
+        this.isJumping = false;
     }
 
     update(deltaTime)
     {
+        this.xPrev = this.x;
+        this.yPrev = this.y;
+
         if (this.curState !== undefined)
         {
             this.curState(deltaTime);
@@ -43,33 +49,36 @@ class Player
         if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
         {
             this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
+
+            // let dx = (aw.mousePos.x - screenWidth*0.5) - this.x;
+            // let dy = ((screenHeight - aw.mousePos.y) - screenHeight*0.5) - this.y;
+            // let dist = Math.sqrt((dx*dx) + (dy*dy));
+            // dx /= dist;
+            // dy /= dist;
+            // this.jumpVel = {x:dx * this.jumpSpeed, y:dy * this.jumpSpeed};
+
             this.speed = -this.speed;
 
+            this.isJumping = true;
             this.curState = this.jumpingUpdate;
         }
     }
 
     jumpingUpdate(deltaTime)
     {
-        let xPrev = this.x;
-        let yPrev = this.y;
-
         this.x += this.jumpVel.x * deltaTime;
         this.y += this.jumpVel.y * deltaTime;
 
-        let intersectInfo = level.getIntersectionInfo(xPrev, yPrev, this.x, this.y);
-        if (intersectInfo.intersect)
+        let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
+        if (intersectInfo.intersect && Math.abs(this.curLineDist - intersectInfo.distance) > 1.0)
         {
             this.curLineDist = intersectInfo.distance;
             let posInfo = level.getPosInfo(this.curLineDist);
             this.x = posInfo.x;
             this.y = posInfo.y;
             this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
-            this.curState = this.onLineUpdate;
-        }
-        else if (aw.keysJustPressed.space)
-        {
-            this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
+
+            this.isJumping = false;
             this.curState = this.onLineUpdate;
         }
     }
@@ -78,7 +87,7 @@ class Player
     {
         aw.ctx.save();
         aw.ctx.translate(this.x, this.y);
-        aw.ctx.rotate(this.angle);
+        //aw.ctx.rotate(this.angle);
         // if (this.curState === this.jumpingUpdate)
         // {
         //     aw.ctx.scale(5.0, 1.0);

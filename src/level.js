@@ -2,20 +2,81 @@ class Level
 {
     constructor()
     {
+        this.addPoints();
+        this.createSegments();
+        this.addItems();
+    }
+
+    addPoints()
+    {
         // ALL TEMP/DEBUG
         this.linePoints = [];
+
+        // BOX
         this.linePoints.push({x:-100, y:100});
         this.linePoints.push({x:100, y: 100});
         this.linePoints.push({x:100, y: -100});
         this.linePoints.push({x:-100, y: -100});
 
+        // CIRCLE
+        // let numPoints = 90;
+        // let angleStep = 360 / numPoints;
+        // let radius = 100;
+        // for (let i = 0; i < numPoints; i++)
+        // {
+        //     let angle = (360 - (i * angleStep)) * Math.PI/180.0;
+        //     let x = Math.cos(angle) * radius;
+        //     let y = Math.sin(angle) * radius;
+        //     this.linePoints.push({x:x, y:y});
+        // }
+    }
+
+    createSegments()
+    {
         this.segLengths = [];
-        this.segLengths.push(200);
-        this.segLengths.push(200);
-        this.segLengths.push(200);
-        this.segLengths.push(200);
-        
-        this.totalDistance = 800;
+        this.totalDistance = 0;
+        for (let i = 0; i < this.linePoints.length - 1; i++)
+        {
+            let xDist = this.linePoints[i + 1].x - this.linePoints[i].x;
+            let yDist = this.linePoints[i + 1].y - this.linePoints[i].y;
+            let segDist = Math.sqrt((xDist*xDist) + (yDist*yDist));
+
+            this.totalDistance += segDist;
+            this.segLengths.push(segDist);
+        }
+
+        let xDist = this.linePoints[0].x - this.linePoints[this.linePoints.length - 1].x;
+        let yDist = this.linePoints[0].y - this.linePoints[this.linePoints.length - 1].y;
+        let segDist = Math.sqrt((xDist*xDist) + (yDist*yDist));
+
+        this.totalDistance += segDist;
+        this.segLengths.push(segDist);
+
+        // this.segLengths.push(200);
+        // this.segLengths.push(200);
+        // this.segLengths.push(200);
+        // this.segLengths.push(200);
+    }
+
+    addItems()
+    {
+        aw.addEntity(new Coin(0, 0));
+        aw.addEntity(new Coin(-50, 0));
+        aw.addEntity(new Coin(50, 0));
+        aw.addEntity(new Coin(-25, 0));
+        aw.addEntity(new Coin(25, 0));
+
+        aw.addEntity(new Coin(0, 50));
+        aw.addEntity(new Coin(-50, 50));
+        aw.addEntity(new Coin(50, 50));
+        aw.addEntity(new Coin(-25, 50));
+        aw.addEntity(new Coin(25, 50));
+
+        aw.addEntity(new Coin(0, -50));
+        aw.addEntity(new Coin(-50, -50));
+        aw.addEntity(new Coin(50, -50));
+        aw.addEntity(new Coin(-25, -50));
+        aw.addEntity(new Coin(25, -50));
     }
 
     update(deltaTime)
@@ -77,7 +138,7 @@ class Level
             let p1 = i;
             let p2 = (i + 1) % this.linePoints.length;
 
-            let lineIntersectInfo = this.getLineIntersectionInfo(x1, y1, x2, y2, this.linePoints[p1].x, this.linePoints[p1].y, this.linePoints[p2].x, this.linePoints[p2].y);
+            let lineIntersectInfo = getLineIntersectionInfo(x1, y1, x2, y2, this.linePoints[p1].x, this.linePoints[p1].y, this.linePoints[p2].x, this.linePoints[p2].y);
             if (lineIntersectInfo.intersect)
             {
                 lineIntersectInfo.distance = curTotalDistance + this.segLengths[i]*(1.0 - lineIntersectInfo.time);
@@ -88,26 +149,5 @@ class Level
         }
 
         return {intersect:false};
-    }
-
-    getLineIntersectionInfo(a, b, c, d, p, q, r, s)
-    {
-        let det, gamma, lambda;
-        let info = {intersect:false};
-        det = (c - a) * (s - q) - (r - p) * (d - b);
-        if (det !== 0)
-        {
-            lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-            gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-            if ((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1))
-            {
-                info.x = p + (r - p)*gamma;
-                info.y = q + (s - q)*gamma;
-                info.time = gamma;
-                info.intersect = true;
-            }
-        }
-
-        return info;
     }
 }
