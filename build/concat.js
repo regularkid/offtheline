@@ -266,7 +266,7 @@ class Coin
 }
 class Wall
 {
-    constructor(x, y, length, angle, rotSpeed)
+    constructor(x, y, length, angle, rotSpeed, xMove, yMove, moveTime, idleTime)
     {
         this.xCenter = x;
         this.yCenter = y;
@@ -274,15 +274,59 @@ class Wall
         this.halfLength = length * 0.5;
         this.angle = angle !== undefined ? angle * Math.PI/180 : 0;
         this.rotSpeed = rotSpeed !== undefined ? rotSpeed * Math.PI/180 : 0;
+        this.xMove = xMove !== undefined ? xMove : 0;
+        this.yMove = yMove !== undefined ? yMove : 0;
+        this.moveTime = moveTime !== undefined ? moveTime : 0;
+        this.idleTime = idleTime !== undefined ? idleTime : 0;
+        this.curTimer = this.moveTime;
+        this.isMoving = true;
+        this.moveForward = true;
+        this.curMovePct = 0.0;
 
         this.updateEndPoints();
     }
 
     update(deltaTime)
     {
+        let changed = false;
+
         if (this.rotSpeed !== 0)
         {
             this.angle += this.rotSpeed*deltaTime;
+            changed = true;
+        }
+
+        if ((this.xMove !== 0 || this.yMove !== 0) && this.moveTime !== 0)
+        {
+            if (this.isMoving)
+            {
+                this.curMovePct = this.moveForward ? 1.0 - (this.curTimer / this.moveTime) : this.curTimer / this.moveTime;
+            }
+            else
+            {
+                this.curMovePct = this.moveForward ? 0.0 : 1.0;
+            }
+
+            this.curTimer -= deltaTime;
+            if (this.curTimer <= 0.0)
+            {
+                if (this.isMoving)
+                {                    
+                    this.curTimer = this.idleTime;
+                    this.moveForward = !this.moveForward;
+                }
+                else
+                {
+                    this.curTimer = this.moveTime;
+                }
+                this.isMoving = !this.isMoving;
+            }
+
+            changed = true;
+        }
+
+        if (changed)
+        {
             this.updateEndPoints();
         }
     }
@@ -291,10 +335,14 @@ class Wall
     {
         let xDir = Math.cos(this.angle);
         let yDir = Math.sin(this.angle);
-        this.x1 = this.xCenter - xDir*this.halfLength;
-        this.y1 = this.yCenter - yDir*this.halfLength;
-        this.x2 = this.xCenter + xDir*this.halfLength;
-        this.y2 = this.yCenter + yDir*this.halfLength;
+
+        let xCenterCur = this.xCenter + this.xMove*this.curMovePct;
+        let yCenterCur = this.yCenter + this.yMove*this.curMovePct;
+
+        this.x1 = xCenterCur - xDir*this.halfLength;
+        this.y1 = yCenterCur - yDir*this.halfLength;
+        this.x2 = xCenterCur + xDir*this.halfLength;
+        this.y2 = yCenterCur + yDir*this.halfLength;
     }
 
     render()
@@ -748,31 +796,48 @@ class L09 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        let radius = 150;
+        let numPoints = 90;
+        let angleStep = (360 / numPoints) * Math.PI/180;
+        for (let i = 0; i < numPoints; i++)
+        {
+            let angle = 360 - (i * angleStep);
+            let x = Math.cos(angle) * radius;
+            let y = Math.sin(angle) * radius;
+            this.linePoints[0].push({x:x, y:y});
+        }
+
+        this.linePoints.push([]);
+        radius = 100;
+        numPoints = 45;
+        angleStep = (360 / numPoints) * Math.PI/180;
+        for (let i = 0; i < numPoints; i++)
+        {
+            let angle = i * angleStep;
+            let x = Math.cos(angle) * radius;
+            let y = Math.sin(angle) * radius;
+            this.linePoints[1].push({x:x, y:y});
+        }
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Coin(0, 115));
+        aw.addEntity(new Coin(0, 135));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        aw.addEntity(new Coin(0, -115));
+        aw.addEntity(new Coin(0, -135));
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(115, 0));
+        aw.addEntity(new Coin(135, 0));
+
+        aw.addEntity(new Coin(-115, 0));
+        aw.addEntity(new Coin(-135, 0));
+
+        aw.addEntity(new Wall(81, 81, 140, -45));
+        aw.addEntity(new Wall(-81, 81, 140, 45));
+        aw.addEntity(new Wall(81, -81, 140, 45));
+        aw.addEntity(new Wall(-81, -81, 140, -45));
     }
 }
 class L10 extends Level
@@ -780,31 +845,25 @@ class L10 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-300, y:100});
+        this.linePoints[0].push({x:-300, y:-100});
+        this.normals.push([]);
+        this.normals[0].push({x:1, y:0});
+        this.normals[0].push({x:1, y:0});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:300, y:100});
+        this.linePoints[1].push({x:300, y:-100});
+        this.normals.push([]);
+        this.normals[1].push({x:1, y:0});
+        this.normals[1].push({x:1, y:0});
     }
 
     addItems()
     {
         aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
-
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Wall(0, 0, 75, 90, 0, 0, 100, 1.0, 0.5));
     }
 }
 class L11 extends Level
@@ -1492,10 +1551,10 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 0;
+var levelIdx = 9;
 var endLevelTime = 0;
 var lives = 5;
-var hardcoreMode = true;
+var hardcoreMode = false;
 let levelClassMap =
 {
     L01: L01,

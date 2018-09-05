@@ -7,10 +7,10 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 0;
+var levelIdx = 9;
 var endLevelTime = 0;
 var lives = 5;
-var hardcoreMode = true;
+var hardcoreMode = false;
 let levelClassMap =
 {
     L01: L01,

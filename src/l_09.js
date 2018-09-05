@@ -3,30 +3,47 @@ class L09 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        let radius = 150;
+        let numPoints = 90;
+        let angleStep = (360 / numPoints) * Math.PI/180;
+        for (let i = 0; i < numPoints; i++)
+        {
+            let angle = 360 - (i * angleStep);
+            let x = Math.cos(angle) * radius;
+            let y = Math.sin(angle) * radius;
+            this.linePoints[0].push({x:x, y:y});
+        }
+
+        this.linePoints.push([]);
+        radius = 100;
+        numPoints = 45;
+        angleStep = (360 / numPoints) * Math.PI/180;
+        for (let i = 0; i < numPoints; i++)
+        {
+            let angle = i * angleStep;
+            let x = Math.cos(angle) * radius;
+            let y = Math.sin(angle) * radius;
+            this.linePoints[1].push({x:x, y:y});
+        }
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Coin(0, 115));
+        aw.addEntity(new Coin(0, 135));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        aw.addEntity(new Coin(0, -115));
+        aw.addEntity(new Coin(0, -135));
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(115, 0));
+        aw.addEntity(new Coin(135, 0));
+
+        aw.addEntity(new Coin(-115, 0));
+        aw.addEntity(new Coin(-135, 0));
+
+        aw.addEntity(new Wall(81, 81, 140, -45));
+        aw.addEntity(new Wall(-81, 81, 140, 45));
+        aw.addEntity(new Wall(81, -81, 140, 45));
+        aw.addEntity(new Wall(-81, -81, 140, -45));
     }
 }
