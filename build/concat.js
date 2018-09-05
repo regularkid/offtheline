@@ -855,15 +855,24 @@ class L10 extends Level
         this.linePoints[1].push({x:300, y:100});
         this.linePoints[1].push({x:300, y:-100});
         this.normals.push([]);
-        this.normals[1].push({x:1, y:0});
-        this.normals[1].push({x:1, y:0});
+        this.normals[1].push({x:-1, y:0});
+        this.normals[1].push({x:-1, y:0});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
+        aw.addEntity(new Coin(-50, 0));
+        aw.addEntity(new Coin(50, 0));
+        aw.addEntity(new Coin(100, 0));
+        aw.addEntity(new Coin(-100, 0));
+        aw.addEntity(new Coin(200, 0));
+        aw.addEntity(new Coin(-200, 0));
+        aw.addEntity(new Coin(250, 0));
+        aw.addEntity(new Coin(-250, 0));
 
-        aw.addEntity(new Wall(0, 0, 75, 90, 0, 0, 100, 1.0, 0.5));
+        aw.addEntity(new Wall(0, -100, 75, 90, 0, 0, 200, 1.0, 0.5));
+        aw.addEntity(new Wall(-150, -100, 75, 90, 0, 0, 200, 1.5, 0.5));
+        aw.addEntity(new Wall(150, -100, 75, 90, 0, 0, 200, 0.5, 0.5));
     }
 }
 class L11 extends Level
@@ -1581,14 +1590,38 @@ let levelClassMap =
 
 function init()
 {
-    aw.state = playing;
-    aw.statePost = drawUI;
-
-    initLevel(levelIdx);
+    aw.state = mainMenu;
 
     aw.ctx.translate(screenWidth*0.5, screenHeight*0.5);
     aw.ctx.scale(1.0, -1.0);
-    aw.ctx.shadowBlur = 10;
+    aw.ctx.shadowBlur = 20;
+}
+
+function mainMenu(deltaTime)
+{
+    if (aw.mouseLeftButtonJustPressed)
+    {
+        lives = 5;
+        levelIdx = 0;
+        initLevel(levelIdx);
+        aw.mouseLeftButtonJustPressed = false;
+        aw.state = playing;
+        aw.statePost = drawUI;
+    }
+
+    aw.ctx.save();
+    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    aw.ctx.shadowColor = "#08F";
+    aw.drawText({text:"OFF THE LINE", x:15, y:10, fontSize:70, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
+
+    aw.ctx.shadowColor = "#FFF";
+    let yMenu = 350;
+    aw.drawText({text:"PLAY", x:15, y:yMenu, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
+    aw.drawText({text:"HARDCORE MODE", x:15, y:yMenu + 40, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
+    aw.drawText({text:"CREDITS", x:15, y:yMenu + 80, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
+
+    aw.ctx.restore();
 }
 
 function playing(deltaTime)
@@ -1744,10 +1777,9 @@ function gameOver(deltaTime)
 {
     if (aw.mouseLeftButtonJustPressed)
     {
-        lives = 5;
-        levelIdx = 0;
-        initLevel(levelIdx);
+        aw.clearAllEntities();
         aw.mouseLeftButtonJustPressed = false;
-        aw.state = playing;
+        aw.state = mainMenu;
+        aw.statePost = undefined;
     }
 }

@@ -37,14 +37,38 @@ let levelClassMap =
 
 function init()
 {
-    aw.state = playing;
-    aw.statePost = drawUI;
-
-    initLevel(levelIdx);
+    aw.state = mainMenu;
 
     aw.ctx.translate(screenWidth*0.5, screenHeight*0.5);
     aw.ctx.scale(1.0, -1.0);
-    aw.ctx.shadowBlur = 10;
+    aw.ctx.shadowBlur = 20;
+}
+
+function mainMenu(deltaTime)
+{
+    if (aw.mouseLeftButtonJustPressed)
+    {
+        lives = 5;
+        levelIdx = 0;
+        initLevel(levelIdx);
+        aw.mouseLeftButtonJustPressed = false;
+        aw.state = playing;
+        aw.statePost = drawUI;
+    }
+
+    aw.ctx.save();
+    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    aw.ctx.shadowColor = "#08F";
+    aw.drawText({text:"OFF THE LINE", x:15, y:10, fontSize:70, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
+
+    aw.ctx.shadowColor = "#FFF";
+    let yMenu = 350;
+    aw.drawText({text:"PLAY", x:15, y:yMenu, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
+    aw.drawText({text:"HARDCORE MODE", x:15, y:yMenu + 40, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
+    aw.drawText({text:"CREDITS", x:15, y:yMenu + 80, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
+
+    aw.ctx.restore();
 }
 
 function playing(deltaTime)
@@ -200,10 +224,9 @@ function gameOver(deltaTime)
 {
     if (aw.mouseLeftButtonJustPressed)
     {
-        lives = 5;
-        levelIdx = 0;
-        initLevel(levelIdx);
+        aw.clearAllEntities();
         aw.mouseLeftButtonJustPressed = false;
-        aw.state = playing;
+        aw.state = mainMenu;
+        aw.statePost = undefined;
     }
 }
