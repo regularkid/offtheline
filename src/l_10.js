@@ -13,8 +13,8 @@ class L10 extends Level
         this.linePoints[1].push({x:300, y:100});
         this.linePoints[1].push({x:300, y:-100});
         this.normals.push([]);
-        this.normals[1].push({x:1, y:0});
-        this.normals[1].push({x:1, y:0});
+        this.normals[1].push({x:-1, y:0});
+        this.normals[1].push({x:-1, y:0});
     }
 
     addItems()
