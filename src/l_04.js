@@ -15,9 +15,9 @@ class L04 extends Level
         aw.addEntity(new Coin(0, 50));
         aw.addEntity(new Coin(0, -50));
 
-        aw.addEntity(new Wall(-35, 25, 50, 0));
-        aw.addEntity(new Wall(35, -25, 50, 0));
-        aw.addEntity(new Wall(35, 75, 50, 0));
-        aw.addEntity(new Wall(-35, -75, 50, 0));
+        aw.addEntity(new Wall(-40, 25, 40, 0));
+        aw.addEntity(new Wall(40, -25, 40, 0));
+        aw.addEntity(new Wall(40, 75, 40, 0));
+        aw.addEntity(new Wall(-40, -75, 40, 0));
     }
 }

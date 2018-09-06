@@ -35,6 +35,8 @@ let levelClassMap =
     L20: L20,
 };
 
+let backgroundSpeedLines = [];
+
 function init()
 {
     aw.state = mainMenu;
@@ -44,17 +46,16 @@ function init()
     aw.ctx.shadowBlur = 20;
 }
 
+var menuOptions =
+[
+    {text:"PLAY", width:150},
+    {text:"HARDCORE MODE", width:360},
+    {text:"CREDITS", width:210}
+];
+
 function mainMenu(deltaTime)
 {
-    if (aw.mouseLeftButtonJustPressed)
-    {
-        lives = 5;
-        levelIdx = 0;
-        initLevel(levelIdx);
-        aw.mouseLeftButtonJustPressed = false;
-        aw.state = playing;
-        aw.statePost = drawUI;
-    }
+    renderBackgroundSpeedLines(deltaTime);
 
     aw.ctx.save();
     aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -62,17 +63,44 @@ function mainMenu(deltaTime)
     aw.ctx.shadowColor = "#08F";
     aw.drawText({text:"OFF THE LINE", x:15, y:10, fontSize:70, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
 
-    aw.ctx.shadowColor = "#FFF";
     let yMenu = 350;
-    aw.drawText({text:"PLAY", x:15, y:yMenu, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
-    aw.drawText({text:"HARDCORE MODE", x:15, y:yMenu + 40, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
-    aw.drawText({text:"CREDITS", x:15, y:yMenu + 80, fontSize:35, fontStyle:"bold italic", color:"#FFF", textAlign:"left", textBaseline:"top"});
+    let yMenuStep = 40;
+    let selectedOption = -1;
+    for (let i = 0; i < menuOptions.length; i++)
+    {
+        let isHighlighted = aw.mousePos.y >= yMenu + yMenuStep*i && aw.mousePos.y < yMenu + yMenuStep*(i + 1) && aw.mousePos.x < menuOptions[i].width;
+        let optionColor = isHighlighted ? "#FF0" : "#FFF";
+        if (isHighlighted)
+        {
+            selectedOption = i;
+        }
+        aw.ctx.shadowColor = optionColor;
+        aw.drawText({text:menuOptions[i].text, x:15, y:yMenu + yMenuStep*i, fontSize:35, fontStyle:"bold italic", color:optionColor, textAlign:"left", textBaseline:"top"}); 
+    }
+    
+    if (aw.mouseLeftButtonJustPressed)
+    {
+        if (selectedOption === 0 || selectedOption === 1)
+        {
+            lives = 5;
+            levelIdx = 0;
+            initLevel(levelIdx);
+            aw.mouseLeftButtonJustPressed = false;
+            hardcoreMode = selectedOption == 1;
+            aw.ctx.shadowBlur = 0;
+            aw.state = playing;
+            aw.statePost = drawUI;
+        }
+    }
 
     aw.ctx.restore();
 }
 
 function playing(deltaTime)
 {
+    aw.ctx.shadowBlur = 10;
+    renderBackgroundSpeedLines(deltaTime);
+
     if (aw.keysJustPressed.right)
     {
         levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
@@ -222,11 +250,52 @@ function drawUI(deltaTime)
 
 function gameOver(deltaTime)
 {
+    renderBackgroundSpeedLines(deltaTime);
+
     if (aw.mouseLeftButtonJustPressed)
     {
         aw.clearAllEntities();
         aw.mouseLeftButtonJustPressed = false;
+        aw.ctx.shadowBlur = 20;
         aw.state = mainMenu;
         aw.statePost = undefined;
     }
+}
+
+var speedLineSize = 400;
+var speedLineSpeed = 4000;
+var numSpeedLinesPerFrame = 2;
+function renderBackgroundSpeedLines(deltaTime)
+{
+    aw.ctx.save();
+    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    for (let i = 0; i < numSpeedLinesPerFrame; i++)
+    {
+        backgroundSpeedLines.push({x:screenWidth, y:Math.random()*screenHeight, _remove:false});
+    }
+
+    aw.ctx.lineWidth = 2;
+    aw.ctx.strokeStyle = aw.state === mainMenu ? "#111" : "#090909";
+    let shadowBlurSave = aw.ctx.shadowBlur;
+    aw.ctx.shadowBlur = 0;
+    
+    backgroundSpeedLines.forEach(speedLine =>
+    {
+        speedLine.x -= speedLineSpeed*deltaTime;
+        if (speedLine.x < -speedLineSize)
+        {
+            speedLine._remove = true;
+        }
+
+        aw.ctx.beginPath();
+        aw.ctx.moveTo(speedLine.x, speedLine.y);
+        aw.ctx.lineTo(speedLine.x + speedLineSize, speedLine.y);
+        aw.ctx.stroke();
+    });
+
+    backgroundSpeedLines = backgroundSpeedLines.filter(speedLine => speedLine._remove !== true);
+
+    aw.ctx.restore();
+    aw.ctx.shadowBlur = shadowBlurSave;
 }
