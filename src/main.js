@@ -53,6 +53,7 @@ var menuOptions =
     {text:"ULTRA MEGA MODE", width:380}
 ];
 
+var prevOption = -1;
 function mainMenu(deltaTime)
 {
     renderBackgroundSpeedLines(deltaTime);
@@ -76,6 +77,15 @@ function mainMenu(deltaTime)
         }
         aw.ctx.shadowColor = optionColor;
         aw.drawText({text:menuOptions[i].text, x:15, y:yMenu + yMenuStep*i, fontSize:35, fontStyle:"bold italic", color:optionColor, textAlign:"left", textBaseline:"top"}); 
+    }
+
+    if (selectedOption !== prevOption)
+    {
+        if (selectedOption !== -1)
+        {
+            aw.playNote("a", 5, 0.025);
+        }
+        prevOption = selectedOption;
     }
     
     if (aw.mouseLeftButtonJustPressed)

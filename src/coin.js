@@ -56,7 +56,7 @@ class Coin
         if (this.active)
         {
             this.active = false;
-            aw.playNote("g", 7, 0.05);
+            aw.playNote("g", 7, 0.025);
         }
     }
 }
