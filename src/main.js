@@ -64,6 +64,9 @@ function mainMenu(deltaTime)
     aw.ctx.shadowColor = "#08F";
     aw.drawText({text:"OFF THE LINE", x:15, y:10, fontSize:70, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
 
+    aw.ctx.shadowColor = "#08F";
+    aw.drawText({text:"A GAME BY BRYAN PERFETTO", x:25, y:85, fontSize:20, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
+
     let yMenu = 350;
     let yMenuStep = 40;
     let selectedOption = -1;
