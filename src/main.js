@@ -91,7 +91,7 @@ function mainMenu(deltaTime)
         prevOption = selectedOption;
     }
     
-    if (aw.mouseLeftButtonJustPressed)
+    if (selectedOption !== -1 && aw.mouseLeftButtonJustPressed)
     {
         lives = 5;
         levelIdx = 0;
