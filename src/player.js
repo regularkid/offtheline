@@ -7,7 +7,7 @@ class Player
         this.xPrev = 0;
         this.yPrev = 0;
         this.boxSize = 12;
-        this.speed = 400;
+        this.speed = difficultyMode === 0 ? 250 : 400;
         this.maxButtonClickLookBackTime = 0.2;
         this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
         this.curLineDist = 0;

@@ -10,7 +10,7 @@ var player;
 var levelIdx = 9;
 var endLevelTime = 0;
 var lives = 5;
-var hardcoreMode = false;
+var difficultyMode = 0;
 let levelClassMap =
 {
     L01: L01,
@@ -48,9 +48,9 @@ function init()
 
 var menuOptions =
 [
-    {text:"PLAY", width:150},
-    {text:"HARDCORE MODE", width:360},
-    {text:"CREDITS", width:210}
+    {text:"EASY MODE", width:260},
+    {text:"HARD MODE", width:260},
+    {text:"ULTRA MEGA MODE", width:380}
 ];
 
 function mainMenu(deltaTime)
@@ -80,17 +80,14 @@ function mainMenu(deltaTime)
     
     if (aw.mouseLeftButtonJustPressed)
     {
-        if (selectedOption === 0 || selectedOption === 1)
-        {
-            lives = 5;
-            levelIdx = 0;
-            initLevel(levelIdx);
-            aw.mouseLeftButtonJustPressed = false;
-            hardcoreMode = selectedOption == 1;
-            aw.ctx.shadowBlur = 0;
-            aw.state = playing;
-            aw.statePost = drawUI;
-        }
+        lives = 5;
+        levelIdx = 0;
+        difficultyMode = selectedOption;
+        initLevel(levelIdx);
+        aw.mouseLeftButtonJustPressed = false;
+        aw.ctx.shadowBlur = 0;
+        aw.state = playing;
+        aw.statePost = drawUI;
     }
 
     aw.ctx.restore();
@@ -118,14 +115,6 @@ function playing(deltaTime)
     else if (aw.keysJustPressed.r)
     {
         initLevel(levelIdx);
-    }
-    else if (aw.keysJustPressed.h)
-    {
-        hardcoreMode = !hardcoreMode;
-        if (hardcoreMode)
-        {
-            level.timer = level.levelTime;
-        }
     }
 
     if (player.isDead || level.isComplete())
@@ -201,7 +190,7 @@ function drawUI(deltaTime)
     aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     // Timer
-    if (hardcoreMode)
+    if (difficultyMode == 2)
     {
         let xStart = 10;
         let yStart = screenHeight - 30;
