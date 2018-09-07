@@ -24,10 +24,9 @@ Create game description
 Make GitHub repos public
 Create postmortem
 Upload to Super micro fun
-Slow down move speed slightly?
 Add win/congratulations screen
 Add debug cheats?
-Add practice mode?
+Add difficult modes?
 ----- Make player bigger and thicker line
 Clean up code
-Delay death screen so you can see the death VFX
+----- Delay death screen so you can see the death VFX

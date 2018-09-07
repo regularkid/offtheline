@@ -237,7 +237,7 @@ function drawUI(deltaTime)
     }
 
     // Game over
-    if (lives === 0)
+    if (aw.state === gameOver)
     {
         aw.ctx.shadowColor = "#111";
         aw.ctx.fillStyle = "#111";
