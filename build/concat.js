@@ -9,8 +9,8 @@ function getLineIntersectionInfo(a, b, c, d, p, q, r, s)
         gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
         if ((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1))
         {
-            info.x = p + (r - p)*gamma;
-            info.y = q + (s - q)*gamma;
+            info.x = p + (r - p)*(1.0 - gamma);
+            info.y = q + (s - q)*(1.0 - gamma);
             info.time = gamma;
             info.intersect = true;
         }
@@ -48,6 +48,55 @@ function distanceToLine(px, py, x1, y1, x2, y2)
     let dy = py - c.y;
     return Math.sqrt((dx*dx) + (dy*dy));
 }
+var deathParticles = [];
+
+function particleUpdate(deltaTime)
+{
+    deathParticles.forEach((particle, idx) =>
+    {
+        let lifePct = particle.timeLeft / 0.5;
+        lifePctSmoothed = 1.0 - (lifePct*lifePct*lifePct);
+        let x = particle.x + Math.cos(particle.moveAngle)*particle.maxRadius*lifePctSmoothed;
+        let y = particle.y + Math.sin(particle.moveAngle)*particle.maxRadius*lifePctSmoothed;
+        let angle = particle.angle + Math.PI*1.0*lifePctSmoothed;
+        if (idx % 2 == 0)
+        {
+            angle = -angle;
+        }
+
+        aw.ctx.globalAlpha = lifePct < 0.25 ? lifePct / 0.25 : 1.0;
+        aw.ctx.save();
+        aw.ctx.translate(x, y);
+        aw.ctx.rotate(angle);
+        let lineWidthSave = aw.ctx.lineWidth;
+        aw.ctx.lineWidth = 4;
+        aw.ctx.strokeStyle = "#08F";
+        aw.ctx.shadowColor = "#08F";
+        aw.ctx.beginPath();
+        aw.ctx.moveTo(-5.0, 0.0);
+        aw.ctx.lineTo(5.0, 0.0);
+        aw.ctx.stroke();
+        aw.ctx.restore();
+        aw.ctx.lineWidth = lineWidthSave;
+        aw.ctx.globalAlpha = 1.0;
+
+        particle.timeLeft -= deltaTime;
+        if (particle.timeLeft <= 0.0)
+        {
+            particle._remove = true;
+        }
+    });
+
+    deathParticles = deathParticles.filter(particle => particle._remove !== true);
+}
+
+function addDeathParticle(x, y)
+{
+    for (let i = 0; i < 10; i++)
+    {
+        deathParticles.push({x:x, y:y, timeLeft:0.5, _remove:false, angle:Math.random()*Math.PI*2, moveAngle:(Math.random()*360)*Math.PI/180, maxRadius:15 + Math.random()*40});
+    }
+}
 class Player
 {
     constructor()
@@ -56,7 +105,7 @@ class Player
         this.y = 0;
         this.xPrev = 0;
         this.yPrev = 0;
-        this.boxSize = 10;
+        this.boxSize = 12;
         this.speed = 400;
         this.maxButtonClickLookBackTime = 0.2;
         this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
@@ -125,6 +174,7 @@ class Player
                 let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
                 if (lineIntersectInfo.intersect)
                 {
+                    addDeathParticle(lineIntersectInfo.x, lineIntersectInfo.y);
                     this.hit();
                 }
             }
@@ -185,13 +235,15 @@ class Player
             // {
             //     aw.ctx.scale(5.0, 1.0);
             // }
-            aw.ctx.lineWidth = 2;
+            let lineWidthSave = aw.ctx.lineWidth;
+            aw.ctx.lineWidth = 4;
             aw.ctx.strokeStyle = "#08F";
             aw.ctx.shadowColor = "#08F";
             aw.ctx.beginPath();
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
             aw.ctx.restore();
+            aw.ctx.lineWidth = lineWidthSave;
         }
     }
 
@@ -414,6 +466,7 @@ class Level
             this.timer = Math.max(this.timer - deltaTime, 0.0);
             if (this.timer <= 0.0)
             {
+                addDeathParticle(player.x, player.y);
                 player.hit();
             }
         }
@@ -1743,11 +1796,13 @@ function initLevel(idx)
     else if (idx == 19) { level = new L20() }
     aw.addEntity(level);
 
-    endLevelTime = 0.5;
+    endLevelTime = 1.0;
 }
 
 function drawUI(deltaTime)
 {
+    particleUpdate(deltaTime);
+
     aw.ctx.save();
     aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
 

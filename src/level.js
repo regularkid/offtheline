@@ -54,6 +54,7 @@ class Level
             this.timer = Math.max(this.timer - deltaTime, 0.0);
             if (this.timer <= 0.0)
             {
+                addDeathParticle(player.x, player.y);
                 player.hit();
             }
         }

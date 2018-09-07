@@ -9,8 +9,8 @@ function getLineIntersectionInfo(a, b, c, d, p, q, r, s)
         gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
         if ((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1))
         {
-            info.x = p + (r - p)*gamma;
-            info.y = q + (s - q)*gamma;
+            info.x = p + (r - p)*(1.0 - gamma);
+            info.y = q + (s - q)*(1.0 - gamma);
             info.time = gamma;
             info.intersect = true;
         }

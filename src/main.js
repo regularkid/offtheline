@@ -160,9 +160,6 @@ function initLevel(idx)
 {
     aw.clearAllEntities();
 
-    player = new Player();
-    aw.addEntity(player);
-
     //idx += 1;
     // let levelClassName = `L${idx < 10 ? "0" + idx : idx}`;
     // level = new levelClassMap[levelClassName]();
@@ -190,11 +187,16 @@ function initLevel(idx)
     else if (idx == 19) { level = new L20() }
     aw.addEntity(level);
 
-    endLevelTime = 0.5;
+    player = new Player();
+    aw.addEntity(player);
+
+    endLevelTime = 1.0;
 }
 
 function drawUI(deltaTime)
 {
+    particleUpdate(deltaTime);
+
     aw.ctx.save();
     aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
 

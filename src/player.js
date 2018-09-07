@@ -6,7 +6,7 @@ class Player
         this.y = 0;
         this.xPrev = 0;
         this.yPrev = 0;
-        this.boxSize = 10;
+        this.boxSize = 12;
         this.speed = 400;
         this.maxButtonClickLookBackTime = 0.2;
         this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
@@ -75,6 +75,7 @@ class Player
                 let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
                 if (lineIntersectInfo.intersect)
                 {
+                    addDeathParticle(lineIntersectInfo.x, lineIntersectInfo.y);
                     this.hit();
                 }
             }
@@ -135,13 +136,15 @@ class Player
             // {
             //     aw.ctx.scale(5.0, 1.0);
             // }
-            aw.ctx.lineWidth = 2;
+            let lineWidthSave = aw.ctx.lineWidth;
+            aw.ctx.lineWidth = 4;
             aw.ctx.strokeStyle = "#08F";
             aw.ctx.shadowColor = "#08F";
             aw.ctx.beginPath();
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
             aw.ctx.restore();
+            aw.ctx.lineWidth = lineWidthSave;
         }
     }
 

@@ -1,0 +1,33 @@
+Scale pop on level start
+----- VFX on death
+SFX on menu option selection / highlight
+VFX on coin grab
+Fix bug with coin grab
+Fix bug with hitting walls
+Add mobile touch events
+Add levels 11 - 25
+Add SFX to death
+Add SFX to level start
+Add SFX to game over
+Add SFX to main menu start
+Add VFX for life lost in UI
+Add VFX for life gain in UI
+Add game over high score display
+Add hardcore mode game over high score display
+Add credits display
+Add screen shake on jump / land
+Add VFX trail on jump
+Add VFX on land
+Verify final build
+Create screenshots
+Create game description
+Make GitHub repos public
+Create postmortem
+Upload to Super micro fun
+Slow down move speed slightly?
+Add win/congratulations screen
+Add debug cheats?
+Add practice mode?
+----- Make player bigger and thicker line
+Clean up code
+Delay death screen so you can see the death VFX
