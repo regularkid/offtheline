@@ -83,6 +83,8 @@ function mainMenu(deltaTime)
         }
     }
 
+    aw.ctx.restore();
+
     if (selectedOption !== prevOption)
     {
         if (selectedOption !== -1)
@@ -103,8 +105,6 @@ function mainMenu(deltaTime)
         aw.state = playing;
         aw.statePost = drawUI;
     }
-
-    aw.ctx.restore();
 }
 
 function playing(deltaTime)
@@ -171,6 +171,12 @@ function initLevel(idx)
 {
     aw.clearAllEntities();
 
+    startLevelScalePop();
+
+    updateCameraShake(0);
+    updateLevelScalePop(0);
+    setLevelCamera();
+
     //idx += 1;
     // let levelClassName = `L${idx < 10 ? "0" + idx : idx}`;
     // level = new levelClassMap[levelClassName]();
@@ -207,8 +213,6 @@ function initLevel(idx)
     aw.playNote("e", 4, 0.05, 0.05);
     aw.playNote("g", 4, 0.05, 0.10);
     aw.playNote("a#", 4, 0.15, 0.15);
-
-    startLevelScalePop();
 }
 
 function drawUI(deltaTime)

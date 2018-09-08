@@ -48,6 +48,61 @@ function distanceToLine(px, py, x1, y1, x2, y2)
     let dy = py - c.y;
     return Math.sqrt((dx*dx) + (dy*dy));
 }
+function resetCamera()
+{
+    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+function setLevelCamera()
+{
+    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    aw.ctx.translate(screenWidth*0.5, screenHeight*0.5);
+    aw.ctx.translate(-shakeAmountCur + shakeAmountCur*Math.random()*2, -shakeAmountCur + shakeAmountCur*Math.random()*2);
+    aw.ctx.scale(levelPopScaleAmountCur, -levelPopScaleAmountCur);
+}
+
+var shakeAmountCur = 0;
+var shakeAmountMax = 0;
+var shakeTimeCur = 0;
+var shakeTimeMax = 0;
+function startCameraShake(amount, time)
+{
+    shakeAmountMax = amount;
+    shakeAmountCur = amount;
+    shakeTimeMax = time;
+    shakeTimeCur = time;
+}
+
+function updateCameraShake(deltaTime)
+{
+    if (shakeTimeCur > 0)
+    {
+        shakeTimeCur -= deltaTime;
+        shakeAmountCur = Math.max((shakeTimeCur / shakeTimeMax) * shakeAmountMax, 0);
+    }
+}
+
+var levelPopScaleAmountMax = 0.15;
+var levelPopScaleAmountCur = 1.0;
+var levelPopScaleTimeMax = 0.2;
+var levelPopScaleTimeCur = 0;
+function startLevelScalePop()
+{
+    levelPopScaleAmountCur = 1.0 + levelPopScaleAmountMax;
+    levelPopScaleTimeCur = levelPopScaleTimeMax;
+    updateLevelScalePop(0.0);
+}
+
+function updateLevelScalePop(deltaTime)
+{
+    if (levelPopScaleTimeCur > 0)
+    {
+        levelPopScaleTimeCur -= deltaTime;
+        let pct = levelPopScaleTimeCur / levelPopScaleTimeMax;
+        pct = pct*pct*pct;
+        levelPopScaleAmountCur = Math.max(1.0 + pct * levelPopScaleAmountMax, 1.0);
+    }
+}
 var deathParticles = [];
 
 function particleUpdate(deltaTime)
@@ -55,7 +110,7 @@ function particleUpdate(deltaTime)
     deathParticles.forEach((particle, idx) =>
     {
         let lifePct = particle.timeLeft / 0.5;
-        lifePctSmoothed = 1.0 - (lifePct*lifePct*lifePct);
+        let lifePctSmoothed = 1.0 - (lifePct*lifePct*lifePct);
         let x = particle.x + Math.cos(particle.moveAngle)*particle.maxRadius*lifePctSmoothed;
         let y = particle.y + Math.sin(particle.moveAngle)*particle.maxRadius*lifePctSmoothed;
         let angle = particle.angle + Math.PI*1.0*lifePctSmoothed;
@@ -73,8 +128,8 @@ function particleUpdate(deltaTime)
         aw.ctx.strokeStyle = "#08F";
         aw.ctx.shadowColor = "#08F";
         aw.ctx.beginPath();
-        aw.ctx.moveTo(-5.0, 0.0);
-        aw.ctx.lineTo(5.0, 0.0);
+        aw.ctx.moveTo(-6.0, 0.0);
+        aw.ctx.lineTo(6.0, 0.0);
         aw.ctx.stroke();
         aw.ctx.restore();
         aw.ctx.lineWidth = lineWidthSave;
@@ -106,7 +161,7 @@ class Player
         this.xPrev = 0;
         this.yPrev = 0;
         this.boxSize = 12;
-        this.speed = 400;
+        this.speed = difficultyMode === 0 ? 250 : 400;
         this.maxButtonClickLookBackTime = 0.2;
         this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
         this.curLineDist = 0;
@@ -146,7 +201,7 @@ class Player
         this.y = posInfo.y;
 
         this.lastLeftButtonClickedDeltaTime += deltaTime;
-        if (aw.mouseLeftButtonJustPressed)
+        if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.left || aw.keysJustPressed.right || aw.keysJustPressed.up || aw.keysJustPressed.down || aw.keysJustPressed.space)
         {
             this.lastLeftButtonClickedDeltaTime = 0;
         }
@@ -158,6 +213,8 @@ class Player
 
             this.isJumping = true;
             this.curState = this.jumpingUpdate;
+
+            //startCameraShake(2.5, 0.1);
         }
     }
 
@@ -215,6 +272,8 @@ class Player
 
                 this.isJumping = false;
                 this.curState = this.onLineUpdate;
+
+                startCameraShake(2.5, 0.15);
             }
         }
     }
@@ -252,6 +311,10 @@ class Player
         lives = Math.max(lives - 1, 0);
         this.isDead = true;
         this.curState = this.deadUpdate;
+
+        startCameraShake(5, 0.2);
+        aw.playNote("a", 1, 0.2, 0.0, "square");
+        aw.playNoise(0.2);
     }
 }
 class Coin
@@ -270,6 +333,8 @@ class Coin
         this.offset = offset !== undefined ? offset : 0;
         this.offsetAngle = offsetAngle !== undefined ? (offsetAngle * Math.PI/180) : 0;
         this.offsetRotSpeed = offsetRotSpeed !== undefined ? (offsetRotSpeed * Math.PI/180) : 0;
+        this.deathTimeCur = 0.0;
+        this.deathTimeMax = 0.5;
     }
 
     update(deltaTime)
@@ -288,15 +353,32 @@ class Coin
                 this.offsetAngle += this.offsetRotSpeed*deltaTime;
             }
         }
+
+        if (!this.active)
+        {
+            this.deathTimeCur += deltaTime;
+        }
     }
 
     render()
     {
-        if (this.active)
+        if (this.active || this.deathTimeCur < this.deathTimeMax)
         {
+            let alphaSave = aw.ctx.globalAlpha;
+
+            let scale = 1.0;
+            if (!this.active)
+            {
+                let deathPct = 1.0 - (this.deathTimeCur / this.deathTimeMax);
+                deathPct = deathPct*deathPct*deathPct*deathPct*deathPct;
+                scale += (1.0 - deathPct)*3.0;
+                aw.ctx.globalAlpha = deathPct;
+            }
+
             aw.ctx.save();
             aw.ctx.translate(this.x, this.y);
             aw.ctx.rotate(this.angle * Math.PI/180);
+            aw.ctx.scale(scale, scale);
             aw.ctx.lineWidth = 2;
             aw.ctx.strokeStyle = "#FF0";
             aw.ctx.shadowColor = "#FF0";
@@ -304,6 +386,8 @@ class Coin
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
             aw.ctx.restore();
+
+            aw.ctx.globalAlpha = alphaSave;
         }
     }
 
@@ -312,7 +396,7 @@ class Coin
         if (this.active)
         {
             this.active = false;
-            aw.playNote("g", 7, 0.05);
+            aw.playNote("g", 7, 0.025);
         }
     }
 }
@@ -461,7 +545,7 @@ class Level
 
     update(deltaTime)
     {
-        if (hardcoreMode && !this.isComplete() && !player.isDead)
+        if (difficultyMode == 2 && !this.isComplete() && !player.isDead)
         {
             this.timer = Math.max(this.timer - deltaTime, 0.0);
             if (this.timer <= 0.0)
@@ -1486,6 +1570,14 @@ class Aw
             "a#": 29.14,
             "b": 30.87,
         }
+
+        let bufferSize = 2 * this.audioCtx.sampleRate * 6;
+        this.noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+        this.noiseOutput = this.noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++)
+        {
+            this.noiseOutput[i] = -1.0 + Math.random() * 2;
+        }
     }
 
     playAudio(name, loop)
@@ -1500,7 +1592,7 @@ class Aw
         this.getAsset(name).currentTime = 0;
     }
 
-    playNote(note, octave, length)
+    playNote(note, octave, length, delay, type)
     {
         let oscillator = this.audioCtx.createOscillator();
         let noteFrequency = this.notes[note.toLowerCase()];
@@ -1509,12 +1601,23 @@ class Aw
             noteFrequency *= Math.pow(2, octave);
         }
 
-        oscillator.type = "triangle";
+        oscillator.type = type !== undefined ? type : "triangle";
         oscillator.frequency.setValueAtTime(noteFrequency, this.audioCtx.currentTime);
         
         oscillator.connect(this.audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(this.audioCtx.currentTime + (length !== undefined ? length : 0.2));  
+        oscillator.start(this.audioCtx.currentTime + (delay !== undefined ? delay : 0));
+        oscillator.stop(this.audioCtx.currentTime + (delay !== undefined ? delay : 0) + (length !== undefined ? length : 0.2));
+    }
+
+    playNoise(length, delay)
+    {
+        let whiteNoise = this.audioCtx.createBufferSource();
+        whiteNoise.buffer = this.noiseBuffer;
+        whiteNoise.loop = true;
+        whiteNoise.start(this.audioCtx.currentTime + (delay !== undefined ? delay : 0));
+        whiteNoise.stop(this.audioCtx.currentTime + (delay !== undefined ? delay : 0) + (length !== undefined ? length : 0.2));
+
+        whiteNoise.connect(this.audioCtx.destination);
     }
 
     ///////////////////////////
@@ -1616,7 +1719,7 @@ var player;
 var levelIdx = 9;
 var endLevelTime = 0;
 var lives = 5;
-var hardcoreMode = false;
+var difficultyMode = 0;
 let levelClassMap =
 {
     L01: L01,
@@ -1646,28 +1749,29 @@ let backgroundSpeedLines = [];
 function init()
 {
     aw.state = mainMenu;
-
-    aw.ctx.translate(screenWidth*0.5, screenHeight*0.5);
-    aw.ctx.scale(1.0, -1.0);
     aw.ctx.shadowBlur = 20;
 }
 
 var menuOptions =
 [
-    {text:"PLAY", width:150},
-    {text:"HARDCORE MODE", width:360},
-    {text:"CREDITS", width:210}
+    {text:"EASY MODE", width:255, helpText:"(SLOW SPEED + 10 LIVES)"},
+    {text:"HARD MODE", width:260, helpText:"(FAST SPEED + 5 LIVES)"},
+    {text:"ULTRA MEGA MODE", width:388, helpText:"(FAST SPEED + 5 LIVES + TIMED LEVELS)"}
 ];
 
+var prevOption = -1;
 function mainMenu(deltaTime)
 {
     renderBackgroundSpeedLines(deltaTime);
 
     aw.ctx.save();
-    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    resetCamera();
 
     aw.ctx.shadowColor = "#08F";
     aw.drawText({text:"OFF THE LINE", x:15, y:10, fontSize:70, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
+
+    aw.ctx.shadowColor = "#08F";
+    aw.drawText({text:"A GAME BY BRYAN PERFETTO", x:25, y:85, fontSize:20, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
 
     let yMenu = 350;
     let yMenuStep = 40;
@@ -1676,30 +1780,40 @@ function mainMenu(deltaTime)
     {
         let isHighlighted = aw.mousePos.y >= yMenu + yMenuStep*i && aw.mousePos.y < yMenu + yMenuStep*(i + 1) && aw.mousePos.x < menuOptions[i].width;
         let optionColor = isHighlighted ? "#FF0" : "#FFF";
+        
+        aw.ctx.shadowColor = optionColor;
+        aw.drawText({text:menuOptions[i].text, x:15, y:yMenu + yMenuStep*i, fontSize:35, fontStyle:"bold italic", color:optionColor, textAlign:"left", textBaseline:"top"}); 
+
         if (isHighlighted)
         {
             selectedOption = i;
-        }
-        aw.ctx.shadowColor = optionColor;
-        aw.drawText({text:menuOptions[i].text, x:15, y:yMenu + yMenuStep*i, fontSize:35, fontStyle:"bold italic", color:optionColor, textAlign:"left", textBaseline:"top"}); 
-    }
-    
-    if (aw.mouseLeftButtonJustPressed)
-    {
-        if (selectedOption === 0 || selectedOption === 1)
-        {
-            lives = 5;
-            levelIdx = 0;
-            initLevel(levelIdx);
-            aw.mouseLeftButtonJustPressed = false;
-            hardcoreMode = selectedOption == 1;
-            aw.ctx.shadowBlur = 0;
-            aw.state = playing;
-            aw.statePost = drawUI;
+            aw.ctx.shadowColor = "#888";
+            aw.drawText({text:menuOptions[i].helpText, x:-15 + menuOptions[i].width, y:yMenu + yMenuStep*i + 12, fontSize:12, fontStyle:"bold italic", color:"#888", textAlign:"left", textBaseline:"top"}); 
         }
     }
 
     aw.ctx.restore();
+
+    if (selectedOption !== prevOption)
+    {
+        if (selectedOption !== -1)
+        {
+            aw.playNote("a", 5, 0.025);
+        }
+        prevOption = selectedOption;
+    }
+    
+    if (selectedOption !== -1 && aw.mouseLeftButtonJustPressed)
+    {
+        lives = 5;
+        levelIdx = 0;
+        difficultyMode = selectedOption;
+        initLevel(levelIdx);
+        aw.mouseLeftButtonJustPressed = false;
+        aw.ctx.shadowBlur = 0;
+        aw.state = playing;
+        aw.statePost = drawUI;
+    }
 }
 
 function playing(deltaTime)
@@ -1725,13 +1839,9 @@ function playing(deltaTime)
     {
         initLevel(levelIdx);
     }
-    else if (aw.keysJustPressed.h)
+    else if (aw.keysJustPressed.s)
     {
-        hardcoreMode = !hardcoreMode;
-        if (hardcoreMode)
-        {
-            level.timer = level.levelTime;
-        }
+        aw.playNoise(0.1, 0.0);
     }
 
     if (player.isDead || level.isComplete())
@@ -1760,14 +1870,21 @@ function playing(deltaTime)
             }
         }
     }
+
+    updateCameraShake(deltaTime);
+    updateLevelScalePop(deltaTime);
+    setLevelCamera();
 }
 
 function initLevel(idx)
 {
     aw.clearAllEntities();
 
-    player = new Player();
-    aw.addEntity(player);
+    startLevelScalePop();
+
+    updateCameraShake(0);
+    updateLevelScalePop(0);
+    setLevelCamera();
 
     //idx += 1;
     // let levelClassName = `L${idx < 10 ? "0" + idx : idx}`;
@@ -1796,18 +1913,25 @@ function initLevel(idx)
     else if (idx == 19) { level = new L20() }
     aw.addEntity(level);
 
+    player = new Player();
+    aw.addEntity(player);
+
     endLevelTime = 1.0;
+
+    aw.playNote("d", 4, 0.05, 0.0);
+    aw.playNote("e", 4, 0.05, 0.05);
+    aw.playNote("g", 4, 0.05, 0.10);
+    aw.playNote("a#", 4, 0.15, 0.15);
 }
 
 function drawUI(deltaTime)
 {
     particleUpdate(deltaTime);
 
-    aw.ctx.save();
-    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    resetCamera();
 
     // Timer
-    if (hardcoreMode)
+    if (difficultyMode == 2)
     {
         let xStart = 10;
         let yStart = screenHeight - 30;
@@ -1843,7 +1967,7 @@ function drawUI(deltaTime)
     }
 
     // Game over
-    if (lives === 0)
+    if (aw.state === gameOver)
     {
         aw.ctx.shadowColor = "#111";
         aw.ctx.fillStyle = "#111";
@@ -1852,8 +1976,6 @@ function drawUI(deltaTime)
         aw.ctx.shadowColor = "#F00";
         aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
     }
-
-    aw.ctx.restore();
 }
 
 function gameOver(deltaTime)
@@ -1868,6 +1990,10 @@ function gameOver(deltaTime)
         aw.state = mainMenu;
         aw.statePost = undefined;
     }
+
+    updateCameraShake(deltaTime);
+    updateLevelScalePop(deltaTime);
+    setLevelCamera();
 }
 
 var speedLineSize = 400;
@@ -1876,7 +2002,7 @@ var numSpeedLinesPerFrame = 2;
 function renderBackgroundSpeedLines(deltaTime)
 {
     aw.ctx.save();
-    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    resetCamera();
 
     for (let i = 0; i < numSpeedLinesPerFrame; i++)
     {

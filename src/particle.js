@@ -5,7 +5,7 @@ function particleUpdate(deltaTime)
     deathParticles.forEach((particle, idx) =>
     {
         let lifePct = particle.timeLeft / 0.5;
-        lifePctSmoothed = 1.0 - (lifePct*lifePct*lifePct);
+        let lifePctSmoothed = 1.0 - (lifePct*lifePct*lifePct);
         let x = particle.x + Math.cos(particle.moveAngle)*particle.maxRadius*lifePctSmoothed;
         let y = particle.y + Math.sin(particle.moveAngle)*particle.maxRadius*lifePctSmoothed;
         let angle = particle.angle + Math.PI*1.0*lifePctSmoothed;

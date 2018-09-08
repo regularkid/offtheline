@@ -38,7 +38,7 @@ var levelPopScaleTimeMax = 0.2;
 var levelPopScaleTimeCur = 0;
 function startLevelScalePop()
 {
-    levelPopScaleAmountCur = levelPopScaleAmountMax;
+    levelPopScaleAmountCur = 1.0 + levelPopScaleAmountMax;
     levelPopScaleTimeCur = levelPopScaleTimeMax;
     updateLevelScalePop(0.0);
 }
