@@ -40,17 +40,14 @@ let backgroundSpeedLines = [];
 function init()
 {
     aw.state = mainMenu;
-
-    aw.ctx.translate(screenWidth*0.5, screenHeight*0.5);
-    aw.ctx.scale(1.0, -1.0);
     aw.ctx.shadowBlur = 20;
 }
 
 var menuOptions =
 [
-    {text:"EASY MODE", width:260},
-    {text:"HARD MODE", width:260},
-    {text:"ULTRA MEGA MODE", width:380}
+    {text:"EASY MODE", width:255, helpText:"(SLOW SPEED + 10 LIVES)"},
+    {text:"HARD MODE", width:260, helpText:"(FAST SPEED + 5 LIVES)"},
+    {text:"ULTRA MEGA MODE", width:388, helpText:"(FAST SPEED + 5 LIVES + TIMED LEVELS)"}
 ];
 
 var prevOption = -1;
@@ -59,7 +56,7 @@ function mainMenu(deltaTime)
     renderBackgroundSpeedLines(deltaTime);
 
     aw.ctx.save();
-    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    resetCamera();
 
     aw.ctx.shadowColor = "#08F";
     aw.drawText({text:"OFF THE LINE", x:15, y:10, fontSize:70, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
@@ -74,12 +71,16 @@ function mainMenu(deltaTime)
     {
         let isHighlighted = aw.mousePos.y >= yMenu + yMenuStep*i && aw.mousePos.y < yMenu + yMenuStep*(i + 1) && aw.mousePos.x < menuOptions[i].width;
         let optionColor = isHighlighted ? "#FF0" : "#FFF";
+        
+        aw.ctx.shadowColor = optionColor;
+        aw.drawText({text:menuOptions[i].text, x:15, y:yMenu + yMenuStep*i, fontSize:35, fontStyle:"bold italic", color:optionColor, textAlign:"left", textBaseline:"top"}); 
+
         if (isHighlighted)
         {
             selectedOption = i;
+            aw.ctx.shadowColor = "#888";
+            aw.drawText({text:menuOptions[i].helpText, x:-15 + menuOptions[i].width, y:yMenu + yMenuStep*i + 12, fontSize:12, fontStyle:"bold italic", color:"#888", textAlign:"left", textBaseline:"top"}); 
         }
-        aw.ctx.shadowColor = optionColor;
-        aw.drawText({text:menuOptions[i].text, x:15, y:yMenu + yMenuStep*i, fontSize:35, fontStyle:"bold italic", color:optionColor, textAlign:"left", textBaseline:"top"}); 
     }
 
     if (selectedOption !== prevOption)
@@ -129,6 +130,10 @@ function playing(deltaTime)
     {
         initLevel(levelIdx);
     }
+    else if (aw.keysJustPressed.s)
+    {
+        aw.playNoise(0.1, 0.0);
+    }
 
     if (player.isDead || level.isComplete())
     {
@@ -156,6 +161,10 @@ function playing(deltaTime)
             }
         }
     }
+
+    updateCameraShake(deltaTime);
+    updateLevelScalePop(deltaTime);
+    setLevelCamera();
 }
 
 function initLevel(idx)
@@ -193,14 +202,20 @@ function initLevel(idx)
     aw.addEntity(player);
 
     endLevelTime = 1.0;
+
+    aw.playNote("d", 4, 0.05, 0.0);
+    aw.playNote("e", 4, 0.05, 0.05);
+    aw.playNote("g", 4, 0.05, 0.10);
+    aw.playNote("a#", 4, 0.15, 0.15);
+
+    startLevelScalePop();
 }
 
 function drawUI(deltaTime)
 {
     particleUpdate(deltaTime);
 
-    aw.ctx.save();
-    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    resetCamera();
 
     // Timer
     if (difficultyMode == 2)
@@ -248,8 +263,6 @@ function drawUI(deltaTime)
         aw.ctx.shadowColor = "#F00";
         aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
     }
-
-    aw.ctx.restore();
 }
 
 function gameOver(deltaTime)
@@ -264,6 +277,10 @@ function gameOver(deltaTime)
         aw.state = mainMenu;
         aw.statePost = undefined;
     }
+
+    updateCameraShake(deltaTime);
+    updateLevelScalePop(deltaTime);
+    setLevelCamera();
 }
 
 var speedLineSize = 400;
@@ -272,7 +289,7 @@ var numSpeedLinesPerFrame = 2;
 function renderBackgroundSpeedLines(deltaTime)
 {
     aw.ctx.save();
-    aw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    resetCamera();
 
     for (let i = 0; i < numSpeedLinesPerFrame; i++)
     {

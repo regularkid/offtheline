@@ -47,7 +47,7 @@ class Player
         this.y = posInfo.y;
 
         this.lastLeftButtonClickedDeltaTime += deltaTime;
-        if (aw.mouseLeftButtonJustPressed)
+        if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.left || aw.keysJustPressed.right || aw.keysJustPressed.up || aw.keysJustPressed.down || aw.keysJustPressed.space)
         {
             this.lastLeftButtonClickedDeltaTime = 0;
         }
@@ -59,6 +59,8 @@ class Player
 
             this.isJumping = true;
             this.curState = this.jumpingUpdate;
+
+            //startCameraShake(2.5, 0.1);
         }
     }
 
@@ -116,6 +118,8 @@ class Player
 
                 this.isJumping = false;
                 this.curState = this.onLineUpdate;
+
+                startCameraShake(2.5, 0.15);
             }
         }
     }
@@ -153,5 +157,9 @@ class Player
         lives = Math.max(lives - 1, 0);
         this.isDead = true;
         this.curState = this.deadUpdate;
+
+        startCameraShake(5, 0.2);
+        aw.playNote("a", 1, 0.2, 0.0, "square");
+        aw.playNoise(0.2);
     }
 }

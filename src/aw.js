@@ -236,6 +236,14 @@ class Aw
             "a#": 29.14,
             "b": 30.87,
         }
+
+        let bufferSize = 2 * this.audioCtx.sampleRate * 6;
+        this.noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+        this.noiseOutput = this.noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++)
+        {
+            this.noiseOutput[i] = -1.0 + Math.random() * 2;
+        }
     }
 
     playAudio(name, loop)
@@ -250,7 +258,7 @@ class Aw
         this.getAsset(name).currentTime = 0;
     }
 
-    playNote(note, octave, length)
+    playNote(note, octave, length, delay, type)
     {
         let oscillator = this.audioCtx.createOscillator();
         let noteFrequency = this.notes[note.toLowerCase()];
@@ -259,12 +267,23 @@ class Aw
             noteFrequency *= Math.pow(2, octave);
         }
 
-        oscillator.type = "triangle";
+        oscillator.type = type !== undefined ? type : "triangle";
         oscillator.frequency.setValueAtTime(noteFrequency, this.audioCtx.currentTime);
         
         oscillator.connect(this.audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(this.audioCtx.currentTime + (length !== undefined ? length : 0.2));  
+        oscillator.start(this.audioCtx.currentTime + (delay !== undefined ? delay : 0));
+        oscillator.stop(this.audioCtx.currentTime + (delay !== undefined ? delay : 0) + (length !== undefined ? length : 0.2));
+    }
+
+    playNoise(length, delay)
+    {
+        let whiteNoise = this.audioCtx.createBufferSource();
+        whiteNoise.buffer = this.noiseBuffer;
+        whiteNoise.loop = true;
+        whiteNoise.start(this.audioCtx.currentTime + (delay !== undefined ? delay : 0));
+        whiteNoise.stop(this.audioCtx.currentTime + (delay !== undefined ? delay : 0) + (length !== undefined ? length : 0.2));
+
+        whiteNoise.connect(this.audioCtx.destination);
     }
 
     ///////////////////////////
