@@ -132,7 +132,12 @@ function playing(deltaTime)
     }
     else if (aw.keysJustPressed.s)
     {
-        aw.playNoise(0.1, 0.0);
+        //aw.playNoise(0.1, 0.0);
+
+        aw.playNote("a", 5, 0.01);
+        aw.playNote("a#", 5, 0.01, 0.01);
+        aw.playNote("b", 5, 0.01, 0.02);
+        aw.playNote("c", 5, 0.01, 0.03);
     }
     else if (aw.keysJustPressed.w)
     {
@@ -151,6 +156,11 @@ function playing(deltaTime)
             if (lives === 0)
             {
                 aw.state = gameOver;
+
+                aw.playNote("a#", 4, 0.05, 0.0);
+                aw.playNote("g", 4, 0.05, 0.05);
+                aw.playNote("e", 4, 0.05, 0.10);
+                aw.playNote("d", 4, 0.15, 0.15);
             }
             else if (player.isDead)
             {

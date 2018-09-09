@@ -2,8 +2,6 @@ Fix bug with coin grab
 Fix bug with hitting walls
 Add mobile touch events
 Add levels 11 - 25
-Add SFX to game over
-Add SFX to jump
 Add VFX for life lost in UI
 Add VFX for life gain in UI
 Add VFX trail on jump
@@ -33,3 +31,5 @@ SFX Toggle
 ----- VFX on coin grab
 ----- Add game over high score display (per difficulty)
 ----- 10 lives for easy mode
+----- Add SFX to game over
+----- Add SFX to jump and land

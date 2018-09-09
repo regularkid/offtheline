@@ -60,7 +60,10 @@ class Player
             this.isJumping = true;
             this.curState = this.jumpingUpdate;
 
-            //startCameraShake(2.5, 0.1);
+            aw.playNote("a", 5, 0.01);
+            aw.playNote("a#", 5, 0.01, 0.01);
+            aw.playNote("b", 5, 0.01, 0.02);
+            //aw.playNote("c", 5, 0.01, 0.03);
         }
     }
 
@@ -120,6 +123,9 @@ class Player
                 this.curState = this.onLineUpdate;
 
                 startCameraShake(2.5, 0.15);
+
+                aw.playNote("a", 4, 0.01);
+                aw.playNote("a#", 4, 0.01, 0.01);
             }
         }
     }
@@ -160,6 +166,6 @@ class Player
 
         startCameraShake(5, 0.2);
         aw.playNote("a", 1, 0.2, 0.0, "square");
-        aw.playNoise(0.2);
+        aw.playNoise(0.05);
     }
 }
