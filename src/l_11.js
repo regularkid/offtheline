@@ -17,11 +17,11 @@ class L11 extends Level
 
     addItems()
     {
-        for (let i = 0; i < 8; i++)
+        for (let i = 0; i < 6; i++)
         {
-            aw.addEntity(new Coin(-175 + 50*i, 30));
-            aw.addEntity(new Coin(-175 + 50*i, 0));
-            aw.addEntity(new Coin(-175 + 50*i, -30));
+            aw.addEntity(new Coin(-125 + 50*i, 30));
+            aw.addEntity(new Coin(-125 + 50*i, 0));
+            aw.addEntity(new Coin(-125 + 50*i, -30));
         }
 
         aw.addEntity(new Wall(0, -50, 50, 90));
@@ -31,7 +31,5 @@ class L11 extends Level
         aw.addEntity(new Wall(100, -50, 50, 90));
         aw.addEntity(new Wall(-150, 50, 50, 90));
         aw.addEntity(new Wall(150, 50, 50, 90));
-        aw.addEntity(new Wall(-200, -50, 50, 90));
-        aw.addEntity(new Wall(200, -50, 50, 90));
     }
 }

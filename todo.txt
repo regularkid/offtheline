@@ -1,9 +1,8 @@
 Fix bug with coin grab
 Fix bug with hitting walls
 Add mobile touch events
-Add levels 11 - 25
+Add levels 13 - 20
 Add VFX for life lost in UI
-Add VFX for life gain in UI
 Add VFX trail on jump
 Add VFX on land
 Verify final build
@@ -12,11 +11,11 @@ Create game description
 Make GitHub repos public
 Create postmortem
 Upload to Super micro fun
-Add win/congratulations screen
 Add debug cheats?
 Clean up code
 SFX Toggle
 Confirmation for quitting ultra mega mode
+Names for each level
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
@@ -34,3 +33,4 @@ Confirmation for quitting ultra mega mode
 ----- 10 lives for easy mode
 ----- Add SFX to game over
 ----- Add SFX to jump and land
+----- Add win/congratulations screen

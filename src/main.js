@@ -41,6 +41,9 @@ function init()
 {
     aw.state = mainMenu;
     aw.ctx.shadowBlur = 20;
+
+    aw.playNote("a", 4, 0.05, 0.0);
+    aw.playNote("b", 4, 0.05, 0.05);
 }
 
 var menuOptions =
@@ -137,10 +140,21 @@ function playing(deltaTime)
     {
         //aw.playNoise(0.1, 0.0);
 
-        aw.playNote("a", 5, 0.01);
-        aw.playNote("a#", 5, 0.01, 0.01);
-        aw.playNote("b", 5, 0.01, 0.02);
-        aw.playNote("c", 5, 0.01, 0.03);
+        // aw.playNote("a", 5, 0.01);
+        // aw.playNote("a#", 5, 0.01, 0.01);
+        // aw.playNote("b", 5, 0.01, 0.02);
+        // aw.playNote("c", 5, 0.01, 0.03);
+
+        for (let i = 0; i < 3; i++)
+        {
+            aw.playNote("d", 5, 0.05, i*0.3 + 0.0);
+            aw.playNote("e", 5, 0.05, i*0.3 + 0.05);
+            aw.playNote("g", 5, 0.05, i*0.3 + 0.1);
+            aw.playNote("a", 5, 0.05, i*0.3 + 0.15);
+            aw.playNote("b", 5, 0.05, i*0.3 + 0.2);
+            aw.playNote("d", 5, 0.05, i*0.3 + 0.25);
+        }
+        aw.playNote("c", 6, 0.5, 0.9);
     }
     else if (aw.keysJustPressed.w)
     {
@@ -157,6 +171,9 @@ function playing(deltaTime)
         aw.ctx.shadowBlur = 20;
         aw.state = mainMenu;
         aw.statePost = undefined;
+
+        aw.playNote("a", 4, 0.05, 0.0);
+        aw.playNote("b", 4, 0.05, 0.05);
     }
 
     if (player.isDead || level.isComplete())
@@ -164,7 +181,22 @@ function playing(deltaTime)
         endLevelTime -= deltaTime;
         if (endLevelTime <= 0.0)
         {
-            if (lives === 0 && difficultyMode !== 2)
+            if (level.isComplete() && levelIdx === 19)
+            {
+                aw.state = gameOver;
+
+                for (let i = 0; i < 3; i++)
+                {
+                    aw.playNote("d", 5, 0.05, i*0.3 + 0.0);
+                    aw.playNote("e", 5, 0.05, i*0.3 + 0.05);
+                    aw.playNote("g", 5, 0.05, i*0.3 + 0.1);
+                    aw.playNote("a", 5, 0.05, i*0.3 + 0.15);
+                    aw.playNote("b", 5, 0.05, i*0.3 + 0.2);
+                    aw.playNote("d", 5, 0.05, i*0.3 + 0.25);
+                }
+                aw.playNote("c", 6, 0.5, 0.9);
+            }
+            else if (lives === 0 && difficultyMode !== 2)
             {
                 aw.state = gameOver;
 
@@ -301,26 +333,52 @@ function drawUI(deltaTime)
     // Game over
     if (aw.state === gameOver)
     {
-        aw.ctx.shadowColor = "#111";
-        aw.ctx.fillStyle = "#111";
-        aw.ctx.fillRect(0, 52, screenWidth, 140);
-
-        aw.ctx.shadowColor = "#F00";
-        aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
-
-        aw.ctx.shadowColor = "#FFF";
-        let modeName = "EASY MODE";
-        if (difficultyMode === 1)
+        if (levelIdx === 19)
         {
-            modeName = "HARD MODE"
+            aw.ctx.shadowColor = "#555";
+            aw.ctx.fillStyle = "#555";
+            aw.ctx.fillRect(0, 100, screenWidth, 110);
+
+            let flashColor = Date.now() % 500 < 250 ? "#08F" : "#FF0";
+            aw.ctx.shadowColor = flashColor;
+            aw.drawText({text:"CONGRATULATIONS!", x:screenWidth*0.5, y:150, fontSize:40, fontStyle:"bold", color:flashColor, textAlign:"center"});
+
+            aw.ctx.shadowColor = "#FFF";
+            let modeName = "EASY MODE";
+            if (difficultyMode === 1)
+            {
+                modeName = "HARD MODE"
+            }
+            else if (difficultyMode === 2)
+            {
+                modeName = "ULTRA MEGA MODE";
+            }
+            aw.drawText({text:`${modeName} COMPLETE`, x:screenWidth*0.5, y:180, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+            aw.drawText({text:"CLICK TO QUIT TO MAIN MENU", x:screenWidth*0.5, y:200, fontSize:14, fontStyle:"bold", color:"#FFF", textAlign:"center"});
         }
-        else if (difficultyMode === 2)
+        else
         {
-            modeName = "ULTRA MEGA MODE";
+            aw.ctx.shadowColor = "#333";
+            aw.ctx.fillStyle = "#333";
+            aw.ctx.fillRect(0, 52, screenWidth, 140);
+
+            aw.ctx.shadowColor = "#F00";
+            aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
+
+            aw.ctx.shadowColor = "#FFF";
+            let modeName = "EASY MODE";
+            if (difficultyMode === 1)
+            {
+                modeName = "HARD MODE"
+            }
+            else if (difficultyMode === 2)
+            {
+                modeName = "ULTRA MEGA MODE";
+            }
+            aw.drawText({text:modeName, x:screenWidth*0.5, y:100 + 30, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+            aw.drawText({text:`SCORE: ${levelIdx + 1}`, x:screenWidth*0.5, y:100 + 55, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+            aw.drawText({text:`BEST: ${getBest() + 1}`, x:screenWidth*0.5, y:100 + 80, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
         }
-        aw.drawText({text:modeName, x:screenWidth*0.5, y:100 + 30, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
-        aw.drawText({text:`SCORE: ${levelIdx + 1}`, x:screenWidth*0.5, y:100 + 55, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
-        aw.drawText({text:`BEST: ${getBest() + 1}`, x:screenWidth*0.5, y:100 + 80, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
     }
 }
 
@@ -335,6 +393,9 @@ function gameOver(deltaTime)
         aw.ctx.shadowBlur = 20;
         aw.state = mainMenu;
         aw.statePost = undefined;
+
+        aw.playNote("a", 4, 0.05, 0.0);
+        aw.playNote("b", 4, 0.05, 0.05);
     }
 
     updateCameraShake(deltaTime);
