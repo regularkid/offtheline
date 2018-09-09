@@ -47,7 +47,7 @@ var menuOptions =
 [
     {text:"EASY MODE", width:255, helpText:"(SLOW SPEED + 10 LIVES)"},
     {text:"HARD MODE", width:260, helpText:"(FAST SPEED + 5 LIVES)"},
-    {text:"ULTRA MEGA MODE", width:388, helpText:"(FAST SPEED + 5 LIVES + TIMED LEVELS)"}
+    {text:"ULTRA MEGA MODE", width:388, helpText:"(FAST SPEED + TIMED LEVELS)"}
 ];
 
 var prevOption = -1;
@@ -63,6 +63,9 @@ function mainMenu(deltaTime)
 
     aw.ctx.shadowColor = "#08F";
     aw.drawText({text:"A GAME BY BRYAN PERFETTO", x:25, y:85, fontSize:20, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
+
+    //aw.ctx.shadowColor = "#888";
+    //aw.drawText({text:"(PRESS 'S' TO TOGGLE SOUNDS)", x:25, y:112.5, fontSize:14, fontStyle:"bold italic", color:"#888", textAlign:"left", textBaseline:"top"});
 
     let yMenu = 350;
     let yMenuStep = 40;
@@ -147,13 +150,21 @@ function playing(deltaTime)
     {
         lives++;
     }
+    else if (aw.keysJustPressed.escape && difficultyMode === 2)
+    {
+        aw.clearAllEntities();
+        aw.mouseLeftButtonJustPressed = false;
+        aw.ctx.shadowBlur = 20;
+        aw.state = mainMenu;
+        aw.statePost = undefined;
+    }
 
     if (player.isDead || level.isComplete())
     {
         endLevelTime -= deltaTime;
         if (endLevelTime <= 0.0)
         {
-            if (lives === 0)
+            if (lives === 0 && difficultyMode !== 2)
             {
                 aw.state = gameOver;
 
@@ -171,10 +182,10 @@ function playing(deltaTime)
                 levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
 
                 // Give extra life on 10/20/30/etc.
-                if ((levelIdx % 10) === 0)
-                {
-                    lives = Math.min(lives + 1, 5);
-                }
+                // if ((levelIdx % 10) === 0)
+                // {
+                //     lives = Math.min(lives + 1, 5);
+                // }
                 initLevel(levelIdx);
             }
         }
@@ -251,30 +262,39 @@ function drawUI(deltaTime)
 
     // Level #
     aw.ctx.shadowColor = "#FFF";
-    aw.drawText({text:`Level ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
+    aw.drawText({text:`LEVEL ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
+    aw.drawText({text:`BEST: ${getBest() + 1}`, x:10, y:50, fontSize:15, fontStyle:"bold", color:"#FFF"});
 
     // Lives
-    let numLives = difficultyMode === 0 ? 10 : 5;
-    let xStart = difficultyMode === 0 ? 440 : 536;
-    for (let i = 0; i < numLives; i++)
+    if (difficultyMode === 2)
     {
-        if (i < lives)
+        aw.ctx.shadowColor = "#08F";
+        aw.drawText({text:"UNLIMITED LIVES - PRESS 'ESC' TO QUIT", x:328, y:25, fontSize:15, fontStyle:"bold", color:"#08F"});
+    }
+    else
+    {
+        let numLives = difficultyMode === 0 ? 10 : 5;
+        let xStart = difficultyMode === 0 ? 440 : 536;
+        for (let i = 0; i < numLives; i++)
         {
-            aw.ctx.lineWidth = 3;
-            aw.ctx.strokeStyle = "#08F";
-            aw.ctx.shadowColor = "#08F";
-            aw.ctx.save();
-            aw.ctx.translate(xStart + 4 + i*20, 18);
-            aw.ctx.beginPath();
-            let boxSize = 10;
-            aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
-            aw.ctx.stroke();
-            aw.ctx.restore();
-        }
-        else
-        {
-            aw.ctx.shadowColor = "#F00";
-            aw.drawText({text:"x", x:xStart + i*19.6, y:30, fontSize:24, fontStyle:"bold", color:"#F00"});
+            if (i < lives)
+            {
+                aw.ctx.lineWidth = 3;
+                aw.ctx.strokeStyle = "#08F";
+                aw.ctx.shadowColor = "#08F";
+                aw.ctx.save();
+                aw.ctx.translate(xStart + 4 + i*20, 18);
+                aw.ctx.beginPath();
+                let boxSize = 10;
+                aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
+                aw.ctx.stroke();
+                aw.ctx.restore();
+            }
+            else
+            {
+                aw.ctx.shadowColor = "#F00";
+                aw.drawText({text:"x", x:xStart + i*19.6, y:30, fontSize:24, fontStyle:"bold", color:"#F00"});
+            }
         }
     }
 

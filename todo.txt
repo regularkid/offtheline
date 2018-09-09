@@ -16,6 +16,7 @@ Add win/congratulations screen
 Add debug cheats?
 Clean up code
 SFX Toggle
+Confirmation for quitting ultra mega mode
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
