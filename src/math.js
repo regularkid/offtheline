@@ -48,3 +48,32 @@ function distanceToLine(px, py, x1, y1, x2, y2)
     let dy = py - c.y;
     return Math.sqrt((dx*dx) + (dy*dy));
 }
+
+// From book: Real Time Collision Detection - Christer Ericson
+function sqDistanceToLine(ax, ay, bx, by, cx, cy)
+{
+    let ab = {x:bx - ax, y:by - ay};
+    let ac = {x:cx - ax, y:cy - ay};
+    let bc = {x:cx - bx, y:cy - by};
+
+    // Handle cases where c projects outside of ab
+    let e = dot(ac, ab);
+    if (e <= 0.0)
+    {
+        return dot(ac, ac);
+    }
+
+    let f = dot(ab, ab);
+    if (e >= f)
+    {
+        return dot(bc, bc);
+    }
+
+    // Handle cases where c projects onto ab
+    return dot(ac, ac) - e * e / f;
+}
+
+function dot(v1, v2)
+{
+    return v1.x*v2.x + v1.y*v2.y;
+}

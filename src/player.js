@@ -19,6 +19,10 @@ class Player
         this.isDead = false;
         this.angle = 0;
         this.rotSpeed = 180;
+
+        let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
+        this.x = posInfo.x;
+        this.y = posInfo.y;
     }
 
     update(deltaTime)
@@ -116,8 +120,8 @@ class Player
             {
                 if (entity instanceof Coin)
                 {
-                    let distToPlayer = distanceToLine(entity.x, entity.y, this.xPrev, this.yPrev, this.x, this.y);
-                    if (distToPlayer <= entity.hitSize)
+                    let distToPlayer = sqDistanceToLine(this.xPrev, this.yPrev, this.x, this.y, entity.x, entity.y);
+                    if (distToPlayer <= entity.hitSizeSq)
                     {
                         entity.hit();
                     }

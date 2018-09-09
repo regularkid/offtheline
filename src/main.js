@@ -104,7 +104,7 @@ function mainMenu(deltaTime)
     {
         difficultyMode = selectedOption;
         lives = difficultyMode === 0 ? 10 : 5;
-        levelIdx = 11;
+        levelIdx = 13;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
         aw.ctx.shadowBlur = 0;

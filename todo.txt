@@ -1,4 +1,3 @@
-Fix bug with coin grab
 Fix bug with hitting walls
 Add mobile touch events
 Add levels 13 - 20
@@ -16,6 +15,7 @@ Clean up code
 SFX Toggle
 Confirmation for quitting ultra mega mode
 Names for each level
+Tune times for each level
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
@@ -34,3 +34,4 @@ Names for each level
 ----- Add SFX to game over
 ----- Add SFX to jump and land
 ----- Add win/congratulations screen
+----- Fix bug with coin grab

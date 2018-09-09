@@ -8,6 +8,7 @@ class Coin
         this.y = y;
         this.boxSize = 8;
         this.hitSize = 20;
+        this.hitSizeSq = this.hitSize * this.hitSize;
         this.angle = 0;
         this.rotSpeed = 180;
         this.active = true;
