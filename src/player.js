@@ -46,24 +46,40 @@ class Player
         this.x = posInfo.x;
         this.y = posInfo.y;
 
-        this.lastLeftButtonClickedDeltaTime += deltaTime;
-        if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.left || aw.keysJustPressed.right || aw.keysJustPressed.up || aw.keysJustPressed.down || aw.keysJustPressed.space)
+        // Check for death
+        aw.entities.forEach(entity =>
         {
-            this.lastLeftButtonClickedDeltaTime = 0;
-        }
+            if (entity instanceof Wall)
+            {
+                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
+                if (lineIntersectInfo.intersect)
+                {
+                    addDeathParticle(lineIntersectInfo.x, lineIntersectInfo.y);
+                    this.hit();
+                }
+            }
+        });
 
-        if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
+        if (!this.isDead)
         {
-            this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
-            this.speed = -this.speed;
+            this.lastLeftButtonClickedDeltaTime += deltaTime;
+            if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.left || aw.keysJustPressed.right || aw.keysJustPressed.up || aw.keysJustPressed.down || aw.keysJustPressed.space)
+            {
+                this.lastLeftButtonClickedDeltaTime = 0;
+            }
 
-            this.isJumping = true;
-            this.curState = this.jumpingUpdate;
+            if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
+            {
+                this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
+                this.speed = -this.speed;
 
-            aw.playNote("a", 5, 0.01);
-            aw.playNote("a#", 5, 0.01, 0.01);
-            aw.playNote("b", 5, 0.01, 0.02);
-            //aw.playNote("c", 5, 0.01, 0.03);
+                this.isJumping = true;
+                this.curState = this.jumpingUpdate;
+
+                aw.playNote("a", 5, 0.01);
+                aw.playNote("a#", 5, 0.01, 0.01);
+                aw.playNote("b", 5, 0.01, 0.02);
+            }
         }
     }
 
@@ -153,6 +169,20 @@ class Player
             aw.ctx.beginPath();
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
+
+            // if (this.isJumping)
+            // {
+            //     let jumpLineLength = 0.1;
+            //     aw.ctx.globalAlpha = 0.25
+            //     aw.ctx.lineWidth = 2;
+            //     aw.ctx.rotate(-this.angle);
+            //     aw.ctx.beginPath();
+            //     aw.ctx.moveTo(0, 0);
+            //     aw.ctx.lineTo(-this.jumpVel.x*jumpLineLength, -this.jumpVel.y*jumpLineLength);
+            //     aw.ctx.stroke();
+            //     aw.ctx.globalAlpha = 1.0;
+            // }
+
             aw.ctx.restore();
             aw.ctx.lineWidth = lineWidthSave;
         }

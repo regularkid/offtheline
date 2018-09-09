@@ -7,7 +7,7 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 9;
+var levelIdx = 0;
 var endLevelTime = 0;
 var lives = 5;
 var difficultyMode = 0;
@@ -98,7 +98,7 @@ function mainMenu(deltaTime)
     {
         difficultyMode = selectedOption;
         lives = difficultyMode === 0 ? 10 : 5;
-        levelIdx = 0;
+        levelIdx = 11;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
         aw.ctx.shadowBlur = 0;
