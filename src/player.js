@@ -23,6 +23,8 @@ class Player
         let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
         this.y = posInfo.y;
+        this.xJump = 0;
+        this.yJump = 0;
     }
 
     update(deltaTime)
@@ -76,6 +78,8 @@ class Player
             {
                 this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
                 this.speed = -this.speed;
+                this.xJump = this.x;
+                this.yJump = this.y;
 
                 this.isJumping = true;
                 this.curState = this.jumpingUpdate;
@@ -130,22 +134,28 @@ class Player
 
             // Check for hitting level again
             let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
-            if (intersectInfo.intersect && (intersectInfo.group !== this.curLevelGroup || Math.abs(this.curLineDist - intersectInfo.distance) > 1.0))
+            if (intersectInfo.intersect)
             {
-                this.curLineDist = intersectInfo.distance;
-                this.curLevelGroup = intersectInfo.group;
-                let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
-                this.x = posInfo.x;
-                this.y = posInfo.y;
-                this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
+                let xDist = intersectInfo.x - this.xJump;
+                let yDist = intersectInfo.y - this.yJump;
+                let sqDist = xDist*xDist + yDist*yDist;
+                if (sqDist > 5.0)
+                {
+                    this.curLineDist = intersectInfo.distance;
+                    this.curLevelGroup = intersectInfo.group;
+                    let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
+                    this.x = posInfo.x;
+                    this.y = posInfo.y;
+                    this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
 
-                this.isJumping = false;
-                this.curState = this.onLineUpdate;
+                    this.isJumping = false;
+                    this.curState = this.onLineUpdate;
 
-                startCameraShake(2.5, 0.15);
+                    startCameraShake(2.5, 0.15);
 
-                aw.playNote("a", 4, 0.01);
-                aw.playNote("a#", 4, 0.01, 0.01);
+                    aw.playNote("a", 4, 0.01);
+                    aw.playNote("a#", 4, 0.01, 0.01);
+                }
             }
         }
     }

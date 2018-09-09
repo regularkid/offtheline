@@ -127,10 +127,10 @@ class Level
                 let p1 = i;
                 let p2 = (i + 1) % this.linePoints[group].length;
 
-                let lineIntersectInfo = getLineIntersectionInfo(x1, y1, x2, y2, this.linePoints[group][p1].x, this.linePoints[group][p1].y, this.linePoints[group][p2].x, this.linePoints[group][p2].y);
+                let lineIntersectInfo = getLineIntersectionInfo(this.linePoints[group][p1].x, this.linePoints[group][p1].y, this.linePoints[group][p2].x, this.linePoints[group][p2].y, x1, y1, x2, y2);
                 if (lineIntersectInfo.intersect)
                 {
-                    lineIntersectInfo.distance = curTotalDistance + this.segLengths[group][i]*(1.0 - lineIntersectInfo.time);
+                    lineIntersectInfo.distance = curTotalDistance + this.segLengths[group][i]*lineIntersectInfo.time;
                     lineIntersectInfo.group = group;
                     return lineIntersectInfo;
                 }
