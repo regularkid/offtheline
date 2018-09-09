@@ -6,7 +6,6 @@ Add SFX to game over
 Add SFX to jump
 Add VFX for life lost in UI
 Add VFX for life gain in UI
-Add game over high score display (per difficulty)
 Add VFX trail on jump
 Add VFX on land
 Verify final build
@@ -18,7 +17,6 @@ Upload to Super micro fun
 Add win/congratulations screen
 Add debug cheats?
 Clean up code
-10 lives for easy mode
 SFX Toggle
 ----- VFX on death
 ----- SFX on menu option selection / highlight
@@ -33,3 +31,5 @@ SFX Toggle
 ----- Scale pop on level start
 ----- Add help text to level modes
 ----- VFX on coin grab
+----- Add game over high score display (per difficulty)
+----- 10 lives for easy mode

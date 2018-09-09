@@ -96,9 +96,9 @@ function mainMenu(deltaTime)
     
     if (selectedOption !== -1 && aw.mouseLeftButtonJustPressed)
     {
-        lives = 5;
-        levelIdx = 0;
         difficultyMode = selectedOption;
+        lives = difficultyMode === 0 ? 10 : 5;
+        levelIdx = 0;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
         aw.ctx.shadowBlur = 0;
@@ -133,6 +133,14 @@ function playing(deltaTime)
     else if (aw.keysJustPressed.s)
     {
         aw.playNoise(0.1, 0.0);
+    }
+    else if (aw.keysJustPressed.w)
+    {
+        lives--;
+    }
+    else if (aw.keysJustPressed.e)
+    {
+        lives++;
     }
 
     if (player.isDead || level.isComplete())
@@ -208,6 +216,7 @@ function initLevel(idx)
     aw.addEntity(player);
 
     endLevelTime = 1.0;
+    setBest();
 
     aw.playNote("d", 4, 0.05, 0.0);
     aw.playNote("e", 4, 0.05, 0.05);
@@ -235,7 +244,9 @@ function drawUI(deltaTime)
     aw.drawText({text:`Level ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
 
     // Lives
-    for (let i = 0; i < 5; i++)
+    let numLives = difficultyMode === 0 ? 10 : 5;
+    let xStart = difficultyMode === 0 ? 440 : 536;
+    for (let i = 0; i < numLives; i++)
     {
         if (i < lives)
         {
@@ -243,7 +254,7 @@ function drawUI(deltaTime)
             aw.ctx.strokeStyle = "#08F";
             aw.ctx.shadowColor = "#08F";
             aw.ctx.save();
-            aw.ctx.translate(540 + i*20, 18);
+            aw.ctx.translate(xStart + 4 + i*20, 18);
             aw.ctx.beginPath();
             let boxSize = 10;
             aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
@@ -253,7 +264,7 @@ function drawUI(deltaTime)
         else
         {
             aw.ctx.shadowColor = "#F00";
-            aw.drawText({text:"x", x:536 + i*19.5, y:30, fontSize:24, fontStyle:"bold", color:"#F00"});
+            aw.drawText({text:"x", x:xStart + i*19.6, y:30, fontSize:24, fontStyle:"bold", color:"#F00"});
         }
     }
 
@@ -262,10 +273,24 @@ function drawUI(deltaTime)
     {
         aw.ctx.shadowColor = "#111";
         aw.ctx.fillStyle = "#111";
-        aw.ctx.fillRect(0, 52, screenWidth, 50);
+        aw.ctx.fillRect(0, 52, screenWidth, 140);
 
         aw.ctx.shadowColor = "#F00";
         aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
+
+        aw.ctx.shadowColor = "#FFF";
+        let modeName = "EASY MODE";
+        if (difficultyMode === 1)
+        {
+            modeName = "HARD MODE"
+        }
+        else if (difficultyMode === 2)
+        {
+            modeName = "ULTRA MEGA MODE";
+        }
+        aw.drawText({text:modeName, x:screenWidth*0.5, y:100 + 30, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+        aw.drawText({text:`SCORE: ${levelIdx + 1}`, x:screenWidth*0.5, y:100 + 55, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+        aw.drawText({text:`BEST: ${getBest() + 1}`, x:screenWidth*0.5, y:100 + 80, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
     }
 }
 

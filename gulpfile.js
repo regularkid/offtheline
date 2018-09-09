@@ -8,6 +8,7 @@ var sourceFiles =
 [
     // Game
     "./src/math.js",
+    "./src/util.js",
     "./src/camera.js",
     "./src/particle.js",
     "./src/player.js",
