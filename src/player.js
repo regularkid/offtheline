@@ -6,6 +6,8 @@ class Player
         this.y = 0;
         this.xPrev = 0;
         this.yPrev = 0;
+        this.xPrev2 = 0;
+        this.yPrev2 = 0;
         this.boxSize = 12;
         this.speed = difficultyMode === 0 ? 250 : 400;
         this.maxButtonClickLookBackTime = 0.2;
@@ -23,12 +25,18 @@ class Player
         let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
         this.y = posInfo.y;
-        this.xJump = 0;
-        this.yJump = 0;
+        this.xPrev2 = this.x;
+        this.yPrev2 = this.y;
+        this.xPrev = this.x;
+        this.yPrev = this.y;
+        this.xJump = this.x;
+        this.yJump = this.y;
     }
 
     update(deltaTime)
     {
+        this.xPrev2 = this.xPrev;
+        this.yPrev2 = this.yPrev;
         this.xPrev = this.x;
         this.yPrev = this.y;
 
@@ -57,7 +65,7 @@ class Player
         {
             if (entity instanceof Wall)
             {
-                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
+                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev2, this.yPrev2, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
                 if (lineIntersectInfo.intersect)
                 {
                     addDeathParticle(lineIntersectInfo.x, lineIntersectInfo.y);
@@ -101,7 +109,8 @@ class Player
         {
             if (entity instanceof Wall)
             {
-                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
+                //console.log(`{ax:${this.xPrev},ay:${this.yPrev},bx:${this.x},by:${this.y},cx:${entity.x1},cy:${entity.y1},dx:${entity.x2},dy:${entity.y2}},`);
+                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev2, this.yPrev2, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
                 if (lineIntersectInfo.intersect)
                 {
                     addDeathParticle(lineIntersectInfo.x, lineIntersectInfo.y);

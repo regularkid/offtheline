@@ -1,6 +1,5 @@
-Fix bug with hitting walls
 Add mobile touch events
-Add levels 13 - 20
+Add levels 18 - 20
 Add VFX for life lost in UI
 Add VFX trail on jump
 Add VFX on land
@@ -16,7 +15,6 @@ SFX Toggle
 Confirmation for quitting ultra mega mode
 Names for each level
 Tune times for each level
-Fix bug with jumping to overlapping line
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
@@ -36,3 +34,5 @@ Fix bug with jumping to overlapping line
 ----- Add SFX to jump and land
 ----- Add win/congratulations screen
 ----- Fix bug with coin grab
+----- Fix bug with hitting walls
+----- Fix bug with jumping to overlapping line
