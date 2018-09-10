@@ -42,6 +42,7 @@ class L18 extends Level
         aw.addEntity(new Coin(-200, -25));
         aw.addEntity(new Coin(-200, 25));
 
-        //aw.addEntity(new Wall(200, 0, 80, 90, 270, -400, 0, 0.75, 0));
+        aw.addEntity(new Wall(200, 0, 80, 0, 270, -400, 0, 0.75, 0));
+        aw.addEntity(new Wall(200, 0, 80, 90, 270, -400, 0, 0.75, 0));
     }
 }
