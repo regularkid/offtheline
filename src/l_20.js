@@ -28,5 +28,8 @@ class L20 extends Level
         aw.addEntity(new Coin(50, -50));
         aw.addEntity(new Coin(-25, -50));
         aw.addEntity(new Coin(25, -50));
+
+        aw.addEntity(new Wall(-32, 32, 50, 0, 180));
+        aw.addEntity(new Wall(38, -50, 50, 90, 0, 0, 50, 1.0, 0.5));
     }
 }

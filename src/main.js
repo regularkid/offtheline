@@ -104,7 +104,7 @@ function mainMenu(deltaTime)
     {
         difficultyMode = selectedOption;
         lives = difficultyMode === 0 ? 10 : 5;
-        levelIdx = 18;
+        levelIdx = 0;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
         aw.ctx.shadowBlur = 0;
@@ -290,16 +290,16 @@ function initLevel(idx)
     else if (idx == 7) { level = new L08() }
     else if (idx == 8) { level = new L09() }
     else if (idx == 9) { level = new L10() }
-    else if (idx == 10) { level = new L11() }
-    else if (idx == 11) { level = new L12() }
-    else if (idx == 12) { level = new L13() }
-    else if (idx == 13) { level = new L14() }
-    else if (idx == 14) { level = new L15() }
+    else if (idx == 10) { level = new L15() }
+    else if (idx == 11) { level = new L13() }
+    else if (idx == 12) { level = new L17() }
+    else if (idx == 13) { level = new L20() }
+    else if (idx == 14) { level = new L12() }
     else if (idx == 15) { level = new L16() }
-    else if (idx == 16) { level = new L17() }
-    else if (idx == 17) { level = new L18() }
+    else if (idx == 16) { level = new L18() }
+    else if (idx == 17) { level = new L11() }
     else if (idx == 18) { level = new L19() }
-    else if (idx == 19) { level = new L20() }
+    else if (idx == 19) { level = new L14() }
     aw.addEntity(level);
 
     player = new Player();

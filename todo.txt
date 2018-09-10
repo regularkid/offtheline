@@ -1,5 +1,4 @@
 Add mobile touch events
-Add levels 19 - 20
 Add VFX for life lost in UI
 Add VFX trail on jump
 Add VFX on land
@@ -14,7 +13,6 @@ Clean up code
 SFX Toggle
 Confirmation for quitting ultra mega mode
 Names for each level
-Tune times for each level
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
@@ -37,3 +35,5 @@ Tune times for each level
 ----- Fix bug with hitting walls
 ----- Fix bug with jumping to overlapping line
 ----- Fix direction issue after jumping (level 18)
+----- Add levels 11 - 20
+----- Tune times for each level

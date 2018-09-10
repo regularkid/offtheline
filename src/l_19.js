@@ -78,6 +78,9 @@ class L19 extends Level
         this.normals[6].push({x:-1, y:0});
         this.normals[6].push({x:-1, y:0});
         this.normals[6].push({x:0, y:1});
+
+        this.levelTime = 12.0;
+        this.timer = this.levelTime;
     }
 
     addItems()

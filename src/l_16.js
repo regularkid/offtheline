@@ -43,6 +43,9 @@ class L16 extends Level
         this.normals.push([]);
         this.normals[5].push({x:0, y: -1});
         this.normals[5].push({x:0, y: -1});
+
+        this.levelTime = 12.0;
+        this.timer = this.levelTime;
     }
 
     addItems()
