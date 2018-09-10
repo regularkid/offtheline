@@ -81,7 +81,7 @@ class Player
         if (!this.isDead)
         {
             this.lastLeftButtonClickedDeltaTime += deltaTime;
-            if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.left || aw.keysJustPressed.right || aw.keysJustPressed.up || aw.keysJustPressed.down || aw.keysJustPressed.space)
+            if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.space)
             {
                 this.lastLeftButtonClickedDeltaTime = 0;
             }
@@ -89,7 +89,6 @@ class Player
             if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
             {
                 this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
-                //this.speed = -this.speed;
                 this.xJump = this.x;
                 this.yJump = this.y;
 
@@ -113,7 +112,6 @@ class Player
         {
             if (entity instanceof Wall)
             {
-                //console.log(`{ax:${this.xPrev},ay:${this.yPrev},bx:${this.x},by:${this.y},cx:${entity.x1},cy:${entity.y1},dx:${entity.x2},dy:${entity.y2}},`);
                 let lineIntersectInfo = getLineIntersectionInfo(this.xPrev2, this.yPrev2, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
                 if (lineIntersectInfo.intersect)
                 {
@@ -191,10 +189,6 @@ class Player
             aw.ctx.save();
             aw.ctx.translate(this.x, this.y);
             aw.ctx.rotate(this.angle);
-            // if (this.curState === this.jumpingUpdate)
-            // {
-            //     aw.ctx.scale(5.0, 1.0);
-            // }
             let lineWidthSave = aw.ctx.lineWidth;
             aw.ctx.lineWidth = 4;
             aw.ctx.strokeStyle = "#08F";
@@ -202,20 +196,6 @@ class Player
             aw.ctx.beginPath();
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
-
-            // if (this.isJumping)
-            // {
-            //     let jumpLineLength = 0.1;
-            //     aw.ctx.globalAlpha = 0.25
-            //     aw.ctx.lineWidth = 2;
-            //     aw.ctx.rotate(-this.angle);
-            //     aw.ctx.beginPath();
-            //     aw.ctx.moveTo(0, 0);
-            //     aw.ctx.lineTo(-this.jumpVel.x*jumpLineLength, -this.jumpVel.y*jumpLineLength);
-            //     aw.ctx.stroke();
-            //     aw.ctx.globalAlpha = 1.0;
-            // }
-
             aw.ctx.restore();
             aw.ctx.lineWidth = lineWidthSave;
         }
