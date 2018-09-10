@@ -96,18 +96,20 @@ class Level
                 let ratio = (distance - curTotalDistance) / this.segLengths[group][i];
                 let p1 = i;
                 let p2 = (i + 1) % this.linePoints[group].length;
-                let xInterp = this.linePoints[group][p1].x + (this.linePoints[group][p2].x - this.linePoints[group][p1].x)*ratio;
-                let yInterp = this.linePoints[group][p1].y + (this.linePoints[group][p2].y - this.linePoints[group][p1].y)*ratio;
+                let xDir = this.linePoints[group][p2].x - this.linePoints[group][p1].x;
+                let yDir = this.linePoints[group][p2].y - this.linePoints[group][p1].y;
+                let xInterp = this.linePoints[group][p1].x + xDir*ratio;
+                let yInterp = this.linePoints[group][p1].y + yDir*ratio;
 
                 if (this.normals[group] !== undefined && this.normals[group][i] !== undefined)
                 {
-                    return {x:xInterp, y:yInterp, nx:this.normals[group][i].x, ny:this.normals[group][i].y};
+                    return {x:xInterp, y:yInterp, nx:this.normals[group][i].x, ny:this.normals[group][i].y, xDir:xDir, yDir:yDir};
                 }
                 else
                 {
                     let xDir = (this.linePoints[group][p2].x - this.linePoints[group][p1].x) / this.segLengths[group][i];
                     let yDir = (this.linePoints[group][p2].y - this.linePoints[group][p1].y) / this.segLengths[group][i];
-                    return {x:xInterp, y:yInterp, nx:yDir, ny:-xDir};
+                    return {x:xInterp, y:yInterp, nx:yDir, ny:-xDir, xDir:xDir, yDir:yDir};
                 }
             }
 

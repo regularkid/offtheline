@@ -1,17 +1,76 @@
-function getLineIntersectionInfo(a, b, c, d, p, q, r, s)
+// function getLineIntersectionInfo(a, b, c, d, p, q, r, s)
+// {
+//     let det, gamma, lambda;
+//     let info = {intersect:false};
+//     det = (c - a) * (s - q) - (r - p) * (d - b);
+//     if (det !== 0)
+//     {
+//         lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+//         gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+//         if ((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1))
+//         {
+//             info.x = p + (r - p)*(1.0 - gamma);
+//             info.y = q + (s - q)*(1.0 - gamma);
+//             info.time = gamma;
+//             info.intersect = true;
+//         }
+//     }
+
+//     return info;
+// }
+
+// function closestPointToLine(px, py, x1, y1, x2, y2)
+// {
+//     let nx = x2 - x1;
+//     let ny = y2 - y1;
+//     let length = Math.sqrt((nx*nx) + (ny*ny));
+//     nx /= length;
+//     ny /= length;
+
+//     let toPx = px - x1;
+//     let toPy = py - y1;
+//     let length2 = Math.sqrt((toPx*toPx) + (toPy*toPy));
+//     toPx /= length2;
+//     toPy /= length2;
+
+//     let dot = (toPx*nx) + (toPy*ny);
+//     let cx = x1 + nx*dot*length;
+//     let cy = y1 + ny*dot*length;
+
+//     return {x:cx, y:cy};
+// }
+
+// function distanceToLine(px, py, x1, y1, x2, y2)
+// {
+//     let c = closestPointToLine(px, py, x1, y1, x2, y2);
+
+//     let dx = px - c.x;
+//     let dy = py - c.y;
+//     return Math.sqrt((dx*dx) + (dy*dy));
+// }
+
+// From book: Real Time Collision Detection - Christer Ericson
+function signed2DTriArea(ax, ay, bx, by, cx, cy)
 {
-    let det, gamma, lambda;
+    return (ax - cx)*(by - cy) - (ay - cy)*(bx - cx);
+}
+
+// From book: Real Time Collision Detection - Christer Ericson
+function getLineIntersectionInfo(ax, ay, bx, by, cx, cy, dx, dy)
+{
     let info = {intersect:false};
-    det = (c - a) * (s - q) - (r - p) * (d - b);
-    if (det !== 0)
+
+    let a1 = signed2DTriArea(ax, ay, bx, by, dx, dy);
+    let a2 = signed2DTriArea(ax, ay, bx, by, cx, cy);
+    if (a1*a2 < 0.0)
     {
-        lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-        gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-        if ((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1))
+        let a3 = signed2DTriArea(cx, cy, dx, dy, ax, ay);
+        let a4 = a3 + a2 - a1;
+        if (a3*a4 < 0.0)
         {
-            info.x = p + (r - p)*(1.0 - gamma);
-            info.y = q + (s - q)*(1.0 - gamma);
-            info.time = gamma;
+            info.time = a3 / (a3 - a4);
+            info.x = ax + info.time*(bx - ax);
+            info.y = ay + info.time*(by - ay);
             info.intersect = true;
         }
     }
@@ -19,34 +78,43 @@ function getLineIntersectionInfo(a, b, c, d, p, q, r, s)
     return info;
 }
 
-function closestPointToLine(px, py, x1, y1, x2, y2)
+// From book: Real Time Collision Detection - Christer Ericson
+function sqDistanceToLine(ax, ay, bx, by, cx, cy)
 {
-    let nx = x2 - x1;
-    let ny = y2 - y1;
-    let length = Math.sqrt((nx*nx) + (ny*ny));
-    nx /= length;
-    ny /= length;
+    let ab = {x:bx - ax, y:by - ay};
+    let ac = {x:cx - ax, y:cy - ay};
+    let bc = {x:cx - bx, y:cy - by};
 
-    let toPx = px - x1;
-    let toPy = py - y1;
-    let length2 = Math.sqrt((toPx*toPx) + (toPy*toPy));
-    toPx /= length2;
-    toPy /= length2;
+    // Handle cases where c projects outside of ab
+    let e = dot(ac, ab);
+    if (e <= 0.0)
+    {
+        return dot(ac, ac);
+    }
 
-    let dot = (toPx*nx) + (toPy*ny);
-    let cx = x1 + nx*dot*length;
-    let cy = y1 + ny*dot*length;
+    let f = dot(ab, ab);
+    if (e >= f)
+    {
+        return dot(bc, bc);
+    }
 
-    return {x:cx, y:cy};
+    // Handle cases where c projects onto ab
+    return dot(ac, ac) - e * e / f;
 }
 
-function distanceToLine(px, py, x1, y1, x2, y2)
+function dot(v1, v2)
 {
-    let c = closestPointToLine(px, py, x1, y1, x2, y2);
+    return v1.x*v2.x + v1.y*v2.y;
+}
+function getBest()
+{
+    let best = window.localStorage.getItem(`best_${difficultyMode}`);
+    return best !== null ? parseInt(best, 10) : 0;
+}
 
-    let dx = px - c.x;
-    let dy = py - c.y;
-    return Math.sqrt((dx*dx) + (dy*dy));
+function setBest()
+{
+    window.localStorage.setItem(`best_${difficultyMode}`, Math.max(levelIdx.toString(), getBest()));
 }
 function resetCamera()
 {
@@ -160,6 +228,8 @@ class Player
         this.y = 0;
         this.xPrev = 0;
         this.yPrev = 0;
+        this.xPrev2 = 0;
+        this.yPrev2 = 0;
         this.boxSize = 12;
         this.speed = difficultyMode === 0 ? 250 : 400;
         this.maxButtonClickLookBackTime = 0.2;
@@ -173,10 +243,22 @@ class Player
         this.isDead = false;
         this.angle = 0;
         this.rotSpeed = 180;
+
+        let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
+        this.x = posInfo.x;
+        this.y = posInfo.y;
+        this.xPrev2 = this.x;
+        this.yPrev2 = this.y;
+        this.xPrev = this.x;
+        this.yPrev = this.y;
+        this.xJump = this.x;
+        this.yJump = this.y;
     }
 
     update(deltaTime)
     {
+        this.xPrev2 = this.xPrev;
+        this.yPrev2 = this.yPrev;
         this.xPrev = this.x;
         this.yPrev = this.y;
 
@@ -200,21 +282,42 @@ class Player
         this.x = posInfo.x;
         this.y = posInfo.y;
 
-        this.lastLeftButtonClickedDeltaTime += deltaTime;
-        if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.left || aw.keysJustPressed.right || aw.keysJustPressed.up || aw.keysJustPressed.down || aw.keysJustPressed.space)
+        // Check for death
+        aw.entities.forEach(entity =>
         {
-            this.lastLeftButtonClickedDeltaTime = 0;
-        }
+            if (entity instanceof Wall)
+            {
+                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev2, this.yPrev2, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
+                if (lineIntersectInfo.intersect)
+                {
+                    addDeathParticle(lineIntersectInfo.x, lineIntersectInfo.y);
+                    this.hit();
+                }
+            }
+        });
 
-        if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
+        if (!this.isDead)
         {
-            this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
-            this.speed = -this.speed;
+            this.lastLeftButtonClickedDeltaTime += deltaTime;
+            if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.left || aw.keysJustPressed.right || aw.keysJustPressed.up || aw.keysJustPressed.down || aw.keysJustPressed.space)
+            {
+                this.lastLeftButtonClickedDeltaTime = 0;
+            }
 
-            this.isJumping = true;
-            this.curState = this.jumpingUpdate;
+            if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
+            {
+                this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
+                this.speed = -this.speed;
+                this.xJump = this.x;
+                this.yJump = this.y;
 
-            //startCameraShake(2.5, 0.1);
+                this.isJumping = true;
+                this.curState = this.jumpingUpdate;
+
+                aw.playNote("a", 5, 0.01);
+                aw.playNote("a#", 5, 0.01, 0.01);
+                aw.playNote("b", 5, 0.01, 0.02);
+            }
         }
     }
 
@@ -228,7 +331,8 @@ class Player
         {
             if (entity instanceof Wall)
             {
-                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
+                //console.log(`{ax:${this.xPrev},ay:${this.yPrev},bx:${this.x},by:${this.y},cx:${entity.x1},cy:${entity.y1},dx:${entity.x2},dy:${entity.y2}},`);
+                let lineIntersectInfo = getLineIntersectionInfo(this.xPrev2, this.yPrev2, this.x, this.y, entity.x1, entity.y1, entity.x2, entity.y2);
                 if (lineIntersectInfo.intersect)
                 {
                     addDeathParticle(lineIntersectInfo.x, lineIntersectInfo.y);
@@ -251,8 +355,8 @@ class Player
             {
                 if (entity instanceof Coin)
                 {
-                    let distToPlayer = distanceToLine(entity.x, entity.y, this.xPrev, this.yPrev, this.x, this.y);
-                    if (distToPlayer <= entity.hitSize)
+                    let distToPlayer = sqDistanceToLine(this.xPrev, this.yPrev, this.x, this.y, entity.x, entity.y);
+                    if (distToPlayer <= entity.hitSizeSq)
                     {
                         entity.hit();
                     }
@@ -261,19 +365,28 @@ class Player
 
             // Check for hitting level again
             let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
-            if (intersectInfo.intersect && (intersectInfo.group !== this.curLevelGroup || Math.abs(this.curLineDist - intersectInfo.distance) > 1.0))
+            if (intersectInfo.intersect)
             {
-                this.curLineDist = intersectInfo.distance;
-                this.curLevelGroup = intersectInfo.group;
-                let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
-                this.x = posInfo.x;
-                this.y = posInfo.y;
-                this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
+                let xDist = intersectInfo.x - this.xJump;
+                let yDist = intersectInfo.y - this.yJump;
+                let sqDist = xDist*xDist + yDist*yDist;
+                if (sqDist > 5.0)
+                {
+                    this.curLineDist = intersectInfo.distance;
+                    this.curLevelGroup = intersectInfo.group;
+                    let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
+                    this.x = posInfo.x;
+                    this.y = posInfo.y;
+                    this.lastLeftButtonClickedDeltaTime = Number.MAX_SAFE_INTEGER;
 
-                this.isJumping = false;
-                this.curState = this.onLineUpdate;
+                    this.isJumping = false;
+                    this.curState = this.onLineUpdate;
 
-                startCameraShake(2.5, 0.15);
+                    startCameraShake(2.5, 0.15);
+
+                    aw.playNote("a", 4, 0.01);
+                    aw.playNote("a#", 4, 0.01, 0.01);
+                }
             }
         }
     }
@@ -301,6 +414,20 @@ class Player
             aw.ctx.beginPath();
             aw.ctx.rect(-this.boxSize*0.5, -this.boxSize*0.5, this.boxSize, this.boxSize);
             aw.ctx.stroke();
+
+            // if (this.isJumping)
+            // {
+            //     let jumpLineLength = 0.1;
+            //     aw.ctx.globalAlpha = 0.25
+            //     aw.ctx.lineWidth = 2;
+            //     aw.ctx.rotate(-this.angle);
+            //     aw.ctx.beginPath();
+            //     aw.ctx.moveTo(0, 0);
+            //     aw.ctx.lineTo(-this.jumpVel.x*jumpLineLength, -this.jumpVel.y*jumpLineLength);
+            //     aw.ctx.stroke();
+            //     aw.ctx.globalAlpha = 1.0;
+            // }
+
             aw.ctx.restore();
             aw.ctx.lineWidth = lineWidthSave;
         }
@@ -314,7 +441,7 @@ class Player
 
         startCameraShake(5, 0.2);
         aw.playNote("a", 1, 0.2, 0.0, "square");
-        aw.playNoise(0.2);
+        aw.playNoise(0.05);
     }
 }
 class Coin
@@ -327,6 +454,7 @@ class Coin
         this.y = y;
         this.boxSize = 8;
         this.hitSize = 20;
+        this.hitSizeSq = this.hitSize * this.hitSize;
         this.angle = 0;
         this.rotSpeed = 180;
         this.active = true;
@@ -623,10 +751,10 @@ class Level
                 let p1 = i;
                 let p2 = (i + 1) % this.linePoints[group].length;
 
-                let lineIntersectInfo = getLineIntersectionInfo(x1, y1, x2, y2, this.linePoints[group][p1].x, this.linePoints[group][p1].y, this.linePoints[group][p2].x, this.linePoints[group][p2].y);
+                let lineIntersectInfo = getLineIntersectionInfo(this.linePoints[group][p1].x, this.linePoints[group][p1].y, this.linePoints[group][p2].x, this.linePoints[group][p2].y, x1, y1, x2, y2);
                 if (lineIntersectInfo.intersect)
                 {
-                    lineIntersectInfo.distance = curTotalDistance + this.segLengths[group][i]*(1.0 - lineIntersectInfo.time);
+                    lineIntersectInfo.distance = curTotalDistance + this.segLengths[group][i]*lineIntersectInfo.time;
                     lineIntersectInfo.group = group;
                     return lineIntersectInfo;
                 }
@@ -721,7 +849,7 @@ class L03 extends Level
         let angleStep = (360 / numPoints) * Math.PI/180;
         for (let i = 0; i < numPoints; i++)
         {
-            let angle = 360 - (i * angleStep);
+            let angle = Math.PI*2 - (i * angleStep);
             let x = Math.cos(angle) * radius;
             let y = Math.sin(angle) * radius;
             this.linePoints[0].push({x:x, y:y});
@@ -938,7 +1066,7 @@ class L09 extends Level
         let angleStep = (360 / numPoints) * Math.PI/180;
         for (let i = 0; i < numPoints; i++)
         {
-            let angle = 360 - (i * angleStep);
+            let angle = Math.PI*2 - (i * angleStep);
             let x = Math.cos(angle) * radius;
             let y = Math.sin(angle) * radius;
             this.linePoints[0].push({x:x, y:y});
@@ -1017,31 +1145,34 @@ class L11 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-300, y:0});
+        this.linePoints[0].push({x:-225, y: 0});
+        this.linePoints[0].push({x:-225, y: 50});
+        this.linePoints[0].push({x:225, y: 50});
+        this.linePoints[0].push({x:225, y: 0});
+        this.linePoints[0].push({x:300, y: 0});
+        this.linePoints[0].push({x:225, y: 0});
+        this.linePoints[0].push({x:225, y: -50});
+        this.linePoints[0].push({x:-225, y: -50});
+        this.linePoints[0].push({x:-225, y: 0});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        for (let i = 0; i < 6; i++)
+        {
+            aw.addEntity(new Coin(-125 + 50*i, 30));
+            aw.addEntity(new Coin(-125 + 50*i, 0));
+            aw.addEntity(new Coin(-125 + 50*i, -30));
+        }
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
-
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Wall(0, -50, 50, 90));
+        aw.addEntity(new Wall(-50, 50, 50, 90));
+        aw.addEntity(new Wall(50, 50, 50, 90));
+        aw.addEntity(new Wall(-100, -50, 50, 90));
+        aw.addEntity(new Wall(100, -50, 50, 90));
+        aw.addEntity(new Wall(-150, 50, 50, 90));
+        aw.addEntity(new Wall(150, 50, 50, 90));
     }
 }
 class L12 extends Level
@@ -1049,31 +1180,51 @@ class L12 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-225, y:150});
+        this.linePoints[0].push({x:-225, y:50});
+        this.linePoints[0].push({x:-125, y:50});
+        this.linePoints[0].push({x:-125, y:150});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:175, y:125});
+        this.linePoints[1].push({x:175, y:75});
+        this.linePoints[1].push({x:225, y:75});
+        this.linePoints[1].push({x:225, y:125});
+
+        this.linePoints.push([]);
+        this.linePoints[2].push({x:150, y:-75});
+        this.linePoints[2].push({x:150, y:-125});
+        this.linePoints[2].push({x:200, y:-125});
+        this.linePoints[2].push({x:200, y:-75});
+
+        this.linePoints.push([]);
+        this.linePoints[3].push({x:-200, y:-85});
+        this.linePoints[3].push({x:-200, y:-110});
+        this.linePoints[3].push({x:-175, y:-110});
+        this.linePoints[3].push({x:-175, y:-85});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        for (let i = 0; i < 5; i++)
+        {
+            aw.addEntity(new Coin(-75 + i*50, 100));
+        }
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        for (let i = 0; i < 6; i++)
+        {
+            aw.addEntity(new Coin(-135 + i*50, -97.5));
+        }
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        for (let i = 0; i < 2; i++)
+        {
+            aw.addEntity(new Coin(-187.5, 10 - i*50));
+        }
+
+        for (let i = 0; i < 3; i++)
+        {
+            aw.addEntity(new Coin(187.5, 50 - i*50));
+        }
     }
 }
 class L13 extends Level
@@ -1081,31 +1232,56 @@ class L13 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-300, y:100});
+
+        this.linePoints[0].push({x:-145, y:100});
+        this.linePoints[0].push({x:-135, y:80});
+        this.linePoints[0].push({x:-115, y:80});
+        this.linePoints[0].push({x:-105, y:100});
+
+        this.linePoints[0].push({x:105, y:100});
+        this.linePoints[0].push({x:115, y:80});
+        this.linePoints[0].push({x:135, y:80});
+        this.linePoints[0].push({x:145, y:100});
+
+        this.linePoints[0].push({x:300, y: 100});
+
+        this.linePoints[0].push({x:300, y:20});
+        this.linePoints[0].push({x:280, y:10});
+        this.linePoints[0].push({x:280, y:-10});
+        this.linePoints[0].push({x:300, y:-20});
+
+        this.linePoints[0].push({x:300, y: -100});
+
+        this.linePoints[0].push({x:145, y:-100});
+        this.linePoints[0].push({x:135, y:-80});
+        this.linePoints[0].push({x:115, y:-80});
+        this.linePoints[0].push({x:105, y:-100});
+
+        this.linePoints[0].push({x:-105, y:-100});
+        this.linePoints[0].push({x:-115, y:-80});
+        this.linePoints[0].push({x:-135, y:-80});
+        this.linePoints[0].push({x:-145, y:-100});
+
+        this.linePoints[0].push({x:-300, y: -100});
+
+        this.linePoints[0].push({x:-300, y:-20});
+        this.linePoints[0].push({x:-280, y:-10});
+        this.linePoints[0].push({x:-280, y:10});
+        this.linePoints[0].push({x:-300, y:20});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
-
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
-
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        for (let i = 0; i < 10; i++)
+        {
+            aw.addEntity(new Coin(-225 + i*50, 0));
+        }
+        
+        aw.addEntity(new Coin(-125, 40));
+        aw.addEntity(new Coin(-125, -40));
+        aw.addEntity(new Coin(125, 40));
+        aw.addEntity(new Coin(125, -40));
     }
 }
 class L14 extends Level
@@ -1113,31 +1289,56 @@ class L14 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.normals.push([]);
+        let radius = 70;
+        let numPoints = 45;
+        let angleStep = (360 / numPoints) * Math.PI/180;
+        for (let i = 0; i < numPoints; i++)
+        {
+            let angle = i * angleStep;
+            let x = Math.cos(angle) * radius;
+            let y = Math.sin(angle) * radius;
+            this.linePoints[0].push({x:x, y:y});
+        }
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:-300, y:50});
+        this.linePoints[1].push({x:-300, y:-50});
+        this.normals.push([]);
+        this.normals[1].push({x:1, y:0});
+        this.normals[1].push({x:1, y:0});
+
+        this.linePoints.push([]);
+        this.linePoints[2].push({x:215, y:-135});
+        this.linePoints[2].push({x:135, y:-215});
+        this.normals.push([]);
+        this.normals[2].push({x:-0.707, y:0.707});
+        this.normals[2].push({x:-0.707, y:0.707});
+
+        this.linePoints.push([]);
+        this.linePoints[3].push({x:175, y:125});
+        this.linePoints[3].push({x:125, y:175});
+        this.normals.push([]);
+        this.normals[3].push({x:-0.707, y:-0.707});
+        this.normals[3].push({x:-0.707, y:-0.707});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Coin(-112, 0));
+        aw.addEntity(new Coin(-162, 0));
+        aw.addEntity(new Coin(-212, 0));
+        aw.addEntity(new Coin(-262, 0));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        aw.addEntity(new Coin(80, -80));
+        aw.addEntity(new Coin(110, -110));
+        aw.addEntity(new Coin(140, -140));
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(85, 85));
+        aw.addEntity(new Coin(120, 120));
+
+        aw.addEntity(new Wall(-188, 150, 75, 90, 0, 0, -300, 0.5, 0.5));
+        aw.addEntity(new Wall(0, 205, 75, -45, 0, 215, -215, 0.5, 0.5));
     }
 }
 class L15 extends Level
@@ -1145,31 +1346,55 @@ class L15 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-280, y:150});
+        this.linePoints[0].push({x:-280, y: -150});
+        this.linePoints[0].push({x:-260, y: -150});
+        this.linePoints[0].push({x:-260, y: 150});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:-100, y:100});
+        this.linePoints[1].push({x:-100, y: -100});
+        this.linePoints[1].push({x:-80, y: -100});
+        this.linePoints[1].push({x:-80, y: 100});
+
+        this.linePoints.push([]);
+        this.linePoints[2].push({x:80, y:50});
+        this.linePoints[2].push({x:80, y: -50});
+        this.linePoints[2].push({x:100, y: -50});
+        this.linePoints[2].push({x:100, y: 50});
+
+        this.linePoints.push([]);
+        this.linePoints[3].push({x:260, y:25});
+        this.linePoints[3].push({x:260, y: -25});
+        this.linePoints[3].push({x:280, y: -25});
+        this.linePoints[3].push({x:280, y: 25});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Coin(-130, 0));
+        aw.addEntity(new Coin(-180, 0));
+        aw.addEntity(new Coin(-230, 0));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        aw.addEntity(new Coin(-130, 80));
+        aw.addEntity(new Coin(-180, 80));
+        aw.addEntity(new Coin(-230, 80));
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(-130, -80));
+        aw.addEntity(new Coin(-180, -80));
+        aw.addEntity(new Coin(-230, -80));
+
+        aw.addEntity(new Coin(-50, -30));
+        aw.addEntity(new Coin(0, -30));
+        aw.addEntity(new Coin(50, -30));
+
+        aw.addEntity(new Coin(-50, 30));
+        aw.addEntity(new Coin(0, 30));
+        aw.addEntity(new Coin(50, 30));
+
+        aw.addEntity(new Coin(130, 0));
+        aw.addEntity(new Coin(180, 0));
+        aw.addEntity(new Coin(230, 0));
     }
 }
 class L16 extends Level
@@ -1177,31 +1402,80 @@ class L16 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-275, y:-200});
+        this.linePoints[0].push({x:-250, y:-200});
+        this.normals.push([]);
+        this.normals[0].push({x:0, y: 1});
+        this.normals[0].push({x:0, y: 1});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:-275, y:0});
+        this.linePoints[1].push({x:-250, y:25});
+        this.normals.push([]);
+        this.normals[1].push({x:0.707, y: -0.707});
+        this.normals[1].push({x:0.707, y: -0.707});
+
+        this.linePoints.push([]);
+        this.linePoints[2].push({x:-150, y:-200});
+        this.linePoints[2].push({x:-25, y:-200});
+        this.normals.push([]);
+        this.normals[2].push({x:0, y: 1});
+        this.normals[2].push({x:0, y: 1});
+
+        this.linePoints.push([]);
+        this.linePoints[3].push({x:-75, y:100});
+        this.linePoints[3].push({x:-50, y:125});
+        this.normals.push([]);
+        this.normals[3].push({x:0.707, y: -0.707});
+        this.normals[3].push({x:0.707, y: -0.707});
+
+        this.linePoints.push([]);
+        this.linePoints[4].push({x:160, y:-200});
+        this.linePoints[4].push({x:285, y:-200});
+        this.normals.push([]);
+        this.normals[4].push({x:0, y: 1});
+        this.normals[4].push({x:0, y: 1});
+
+        this.linePoints.push([]);
+        this.linePoints[5].push({x:160, y:200});
+        this.linePoints[5].push({x:285, y:200});
+        this.normals.push([]);
+        this.normals[5].push({x:0, y: -1});
+        this.normals[5].push({x:0, y: -1});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        for (let i = 0; i < 3; i++)
+        {
+            aw.addEntity(new Coin(-262, -150 + i*50));
+        }
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        for (let i = 1; i < 4; i++)
+        {
+            aw.addEntity(new Coin(-262 + i*50, 12 - i*50));
+        }
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        for (let i = 0; i < 5; i++)
+        {
+            aw.addEntity(new Coin(-62, -150 + i*50));
+        }
+
+        for (let i = 1; i < 6; i++)
+        {
+            aw.addEntity(new Coin(-62 + i*50, 112 - i*50));
+        }
+
+        for (let i = 0; i < 7; i++)
+        {
+            aw.addEntity(new Coin(222, -150 + i*50));
+        }
+
+        aw.addEntity(new Wall(-225, -75, 100, 0, -180));
+        aw.addEntity(new Wall(-12, 0, 125, 0, 180));
+
+        aw.addEntity(new Wall(222, 50, 100, 0, 0, -100, 0, 1.0, 0.5));
+        aw.addEntity(new Wall(222, -50, 100, 0, 0, 100, 0, 1.0, 0.5));
     }
 }
 class L17 extends Level
@@ -1209,31 +1483,48 @@ class L17 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        let radius = 300;
+        let numPoints = 90;
+        let angleStep = (360 / numPoints) * Math.PI/180;
+        for (let i = 0; i < numPoints / 4; i++)
+        {
+            let angle = Math.PI*1.745 - (i * angleStep);
+            let x = Math.cos(angle) * radius;
+            let y = Math.sin(angle) * radius;
+            this.linePoints[0].push({x:x, y:y + 150});
+        }
+
+        this.linePoints[0].push({x:-50, y:150});
+        this.linePoints[0].push({x:50, y:150});
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        let xStart = -60;
+        let yStart = 95;
+        let stepSize = 50;
+        let xStep = Math.cos(235 * Math.PI/180) * stepSize;
+        let yStep = Math.sin(235 * Math.PI/180) * stepSize;
+        for (let i = 0; i < 4; i++)
+        {
+            aw.addEntity(new Coin(-xStart - xStep*i, yStart + yStep*i));
+            aw.addEntity(new Coin(xStart + xStep*i, yStart + yStep*i));
+        }
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        xStart = -17;
+        yStart = 85;
+        stepSize = 50;
+        xStep = Math.cos(255 * Math.PI/180) * stepSize;
+        yStep = Math.sin(255 * Math.PI/180) * stepSize;
+        for (let i = 0; i < 4; i++)
+        {
+            aw.addEntity(new Coin(-xStart - xStep*i, yStart + yStep*i));
+            aw.addEntity(new Coin(xStart + xStep*i, yStart + yStep*i));
+        }
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Wall(0, 0, 150, 90));
+        aw.addEntity(new Wall(75, 20, 150, -60));
+        aw.addEntity(new Wall(-75, 20, 150, 60));
     }
 }
 class L18 extends Level
@@ -1716,7 +2007,7 @@ aw.state = init;
 
 var level;
 var player;
-var levelIdx = 9;
+var levelIdx = 0;
 var endLevelTime = 0;
 var lives = 5;
 var difficultyMode = 0;
@@ -1750,13 +2041,16 @@ function init()
 {
     aw.state = mainMenu;
     aw.ctx.shadowBlur = 20;
+
+    aw.playNote("a", 4, 0.05, 0.0);
+    aw.playNote("b", 4, 0.05, 0.05);
 }
 
 var menuOptions =
 [
     {text:"EASY MODE", width:255, helpText:"(SLOW SPEED + 10 LIVES)"},
     {text:"HARD MODE", width:260, helpText:"(FAST SPEED + 5 LIVES)"},
-    {text:"ULTRA MEGA MODE", width:388, helpText:"(FAST SPEED + 5 LIVES + TIMED LEVELS)"}
+    {text:"ULTRA MEGA MODE", width:388, helpText:"(FAST SPEED + TIMED LEVELS)"}
 ];
 
 var prevOption = -1;
@@ -1772,6 +2066,9 @@ function mainMenu(deltaTime)
 
     aw.ctx.shadowColor = "#08F";
     aw.drawText({text:"A GAME BY BRYAN PERFETTO", x:25, y:85, fontSize:20, fontStyle:"bold italic", color:"#08F", textAlign:"left", textBaseline:"top"});
+
+    //aw.ctx.shadowColor = "#888";
+    //aw.drawText({text:"(PRESS 'S' TO TOGGLE SOUNDS)", x:25, y:112.5, fontSize:14, fontStyle:"bold italic", color:"#888", textAlign:"left", textBaseline:"top"});
 
     let yMenu = 350;
     let yMenuStep = 40;
@@ -1805,9 +2102,9 @@ function mainMenu(deltaTime)
     
     if (selectedOption !== -1 && aw.mouseLeftButtonJustPressed)
     {
-        lives = 5;
-        levelIdx = 0;
         difficultyMode = selectedOption;
+        lives = difficultyMode === 0 ? 10 : 5;
+        levelIdx = 4;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
         aw.ctx.shadowBlur = 0;
@@ -1841,7 +2138,42 @@ function playing(deltaTime)
     }
     else if (aw.keysJustPressed.s)
     {
-        aw.playNoise(0.1, 0.0);
+        //aw.playNoise(0.1, 0.0);
+
+        // aw.playNote("a", 5, 0.01);
+        // aw.playNote("a#", 5, 0.01, 0.01);
+        // aw.playNote("b", 5, 0.01, 0.02);
+        // aw.playNote("c", 5, 0.01, 0.03);
+
+        for (let i = 0; i < 3; i++)
+        {
+            aw.playNote("d", 5, 0.05, i*0.3 + 0.0);
+            aw.playNote("e", 5, 0.05, i*0.3 + 0.05);
+            aw.playNote("g", 5, 0.05, i*0.3 + 0.1);
+            aw.playNote("a", 5, 0.05, i*0.3 + 0.15);
+            aw.playNote("b", 5, 0.05, i*0.3 + 0.2);
+            aw.playNote("d", 5, 0.05, i*0.3 + 0.25);
+        }
+        aw.playNote("c", 6, 0.5, 0.9);
+    }
+    else if (aw.keysJustPressed.w)
+    {
+        lives--;
+    }
+    else if (aw.keysJustPressed.e)
+    {
+        lives++;
+    }
+    else if (aw.keysJustPressed.escape && difficultyMode === 2)
+    {
+        aw.clearAllEntities();
+        aw.mouseLeftButtonJustPressed = false;
+        aw.ctx.shadowBlur = 20;
+        aw.state = mainMenu;
+        aw.statePost = undefined;
+
+        aw.playNote("a", 4, 0.05, 0.0);
+        aw.playNote("b", 4, 0.05, 0.05);
     }
 
     if (player.isDead || level.isComplete())
@@ -1849,9 +2181,29 @@ function playing(deltaTime)
         endLevelTime -= deltaTime;
         if (endLevelTime <= 0.0)
         {
-            if (lives === 0)
+            if (level.isComplete() && levelIdx === 19)
             {
                 aw.state = gameOver;
+
+                for (let i = 0; i < 3; i++)
+                {
+                    aw.playNote("d", 5, 0.05, i*0.3 + 0.0);
+                    aw.playNote("e", 5, 0.05, i*0.3 + 0.05);
+                    aw.playNote("g", 5, 0.05, i*0.3 + 0.1);
+                    aw.playNote("a", 5, 0.05, i*0.3 + 0.15);
+                    aw.playNote("b", 5, 0.05, i*0.3 + 0.2);
+                    aw.playNote("d", 5, 0.05, i*0.3 + 0.25);
+                }
+                aw.playNote("c", 6, 0.5, 0.9);
+            }
+            else if (lives === 0 && difficultyMode !== 2)
+            {
+                aw.state = gameOver;
+
+                aw.playNote("a#", 4, 0.05, 0.0);
+                aw.playNote("g", 4, 0.05, 0.05);
+                aw.playNote("e", 4, 0.05, 0.10);
+                aw.playNote("d", 4, 0.15, 0.15);
             }
             else if (player.isDead)
             {
@@ -1862,10 +2214,10 @@ function playing(deltaTime)
                 levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
 
                 // Give extra life on 10/20/30/etc.
-                if ((levelIdx % 10) === 0)
-                {
-                    lives = Math.min(lives + 1, 5);
-                }
+                // if ((levelIdx % 10) === 0)
+                // {
+                //     lives = Math.min(lives + 1, 5);
+                // }
                 initLevel(levelIdx);
             }
         }
@@ -1874,6 +2226,43 @@ function playing(deltaTime)
     updateCameraShake(deltaTime);
     updateLevelScalePop(deltaTime);
     setLevelCamera();
+
+
+
+
+    // TEST
+    // tests =
+    // [
+    //     {ax:-52.691979809312386,ay:147.3080201906876,bx:-35.01501738643019,by:129.63105776780543,cx:-103.63135569893079,cy:-69.89665311015746,dx:103.63135569893079,dy:69.89665311015746},
+    //     {ax:-35.01501738643019,ay:129.63105776780543,bx:-17.33805496354751,by:111.95409534492275,cx:-102.81110763838701,cy:-71.09765218463968,dx:102.81110763838701,dy:71.09765218463968},
+    //     {ax:-17.33805496354751,ay:111.95409534492275,bx:0.3389074593346848,by:94.27713292204055,cx:-101.97694171310376,cy:-72.28902654512812,dx:101.97694171310376,dy:72.28902654512812},
+    //     {ax:0.3389074593346848,ay:94.27713292204055,bx:18.01586988221688,by:76.60017049915835,cx:-101.12897084676004,cy:-73.4706149115084,dx:101.12897084676004,dy:73.4706149115084},
+    //     {ax:18.01586988221688,ay:76.60017049915835,bx:35.69283230510004,by:58.92320807627519,cx:-100.26730983185334,cy:-74.64225732842709,dx:100.26730983185334,dy:74.64225732842709},
+    //     {ax:35.69283230510004,ay:58.92320807627519,bx:53.36979472798272,by:41.246245653392506,cx:-99.39207531415995,cy:-75.80379518694531,dx:99.39207531415995,dy:75.80379518694531},
+    //     {ax:53.36979472798272,ay:41.246245653392506,bx:71.04675715086492,by:23.56928323051031,cx:-98.50338577694417,cy:-76.95507124601025,dx:98.50338577694417,dy:76.95507124601025},
+    //     {ax:71.04675715086492,ay:23.56928323051031,bx:88.72371957374712,by:5.892320807628117,cx:-97.60136152491869,cy:-78.09592965374138,dx:97.60136152491869,dy:78.09592965374138},
+    //     {ax:88.72371957374712,ay:5.892320807628117,bx:106.40068199662932,by:-11.784641615254078,cx:-96.68612466795882,cy:-79.22621596852852,dx:96.68612466795882,dy:79.22621596852852},
+    //     {ax:106.40068199662932,ay:-11.784641615254078,bx:124.077644419512,by:-29.461604038136755,cx:-95.75779910457193,cy:-80.34577717993923,dx:95.75779910457193,dy:80.34577717993923},
+    //     {ax:124.077644419512,ay:-29.461604038136755,bx:141.75460684239565,by:-47.138566461020396,cx:-94.81651050512494,cy:-81.45446172943218,dx:94.81651050512494,dy:81.45446172943218},
+    //     {ax:141.75460684239565,ay:-47.138566461020396,bx:159.43156926527735,by:-64.8155288839021,cx:-93.86238629483216,cy:-82.55211953087397,dx:93.86238629483216,dy:82.55211953087397}
+    // ];
+
+    // let test = tests[6];
+    // aw.ctx.save();
+    // aw.ctx.lineWidth = 2;
+    // aw.ctx.strokeStyle = "#0F0";
+    // aw.ctx.shadowColor = "#0F0";
+    // aw.ctx.beginPath();
+    // aw.ctx.moveTo(test.ax, test.ay);
+    // aw.ctx.lineTo(test.bx, test.by);
+    // aw.ctx.stroke();
+    // aw.ctx.strokeStyle = "#FF0";
+    // aw.ctx.shadowColor = "#FF0";
+    // aw.ctx.beginPath();
+    // aw.ctx.moveTo(test.cx, test.cy);
+    // aw.ctx.lineTo(test.dx, test.dy);
+    // aw.ctx.stroke();
+    // aw.ctx.restore();
 }
 
 function initLevel(idx)
@@ -1917,6 +2306,7 @@ function initLevel(idx)
     aw.addEntity(player);
 
     endLevelTime = 1.0;
+    setBest();
 
     aw.playNote("d", 4, 0.05, 0.0);
     aw.playNote("e", 4, 0.05, 0.05);
@@ -1941,40 +2331,91 @@ function drawUI(deltaTime)
 
     // Level #
     aw.ctx.shadowColor = "#FFF";
-    aw.drawText({text:`Level ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
+    aw.drawText({text:`LEVEL ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
+    aw.drawText({text:`BEST: ${getBest() + 1}`, x:10, y:50, fontSize:15, fontStyle:"bold", color:"#FFF"});
 
     // Lives
-    for (let i = 0; i < 5; i++)
+    if (difficultyMode === 2)
     {
-        if (i < lives)
+        aw.ctx.shadowColor = "#08F";
+        aw.drawText({text:"UNLIMITED LIVES - PRESS 'ESC' TO QUIT", x:328, y:25, fontSize:15, fontStyle:"bold", color:"#08F"});
+    }
+    else
+    {
+        let numLives = difficultyMode === 0 ? 10 : 5;
+        let xStart = difficultyMode === 0 ? 440 : 536;
+        for (let i = 0; i < numLives; i++)
         {
-            aw.ctx.lineWidth = 3;
-            aw.ctx.strokeStyle = "#08F";
-            aw.ctx.shadowColor = "#08F";
-            aw.ctx.save();
-            aw.ctx.translate(540 + i*20, 18);
-            aw.ctx.beginPath();
-            let boxSize = 10;
-            aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
-            aw.ctx.stroke();
-            aw.ctx.restore();
-        }
-        else
-        {
-            aw.ctx.shadowColor = "#F00";
-            aw.drawText({text:"x", x:536 + i*19.5, y:30, fontSize:24, fontStyle:"bold", color:"#F00"});
+            if (i < lives)
+            {
+                aw.ctx.lineWidth = 3;
+                aw.ctx.strokeStyle = "#08F";
+                aw.ctx.shadowColor = "#08F";
+                aw.ctx.save();
+                aw.ctx.translate(xStart + 4 + i*20, 18);
+                aw.ctx.beginPath();
+                let boxSize = 10;
+                aw.ctx.rect(-boxSize*0.5, -boxSize*0.5, boxSize, boxSize);
+                aw.ctx.stroke();
+                aw.ctx.restore();
+            }
+            else
+            {
+                aw.ctx.shadowColor = "#F00";
+                aw.drawText({text:"x", x:xStart + i*19.6, y:30, fontSize:24, fontStyle:"bold", color:"#F00"});
+            }
         }
     }
 
     // Game over
     if (aw.state === gameOver)
     {
-        aw.ctx.shadowColor = "#111";
-        aw.ctx.fillStyle = "#111";
-        aw.ctx.fillRect(0, 52, screenWidth, 50);
+        if (levelIdx === 19)
+        {
+            aw.ctx.shadowColor = "#555";
+            aw.ctx.fillStyle = "#555";
+            aw.ctx.fillRect(0, 100, screenWidth, 110);
 
-        aw.ctx.shadowColor = "#F00";
-        aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
+            let flashColor = Date.now() % 500 < 250 ? "#08F" : "#FF0";
+            aw.ctx.shadowColor = flashColor;
+            aw.drawText({text:"CONGRATULATIONS!", x:screenWidth*0.5, y:150, fontSize:40, fontStyle:"bold", color:flashColor, textAlign:"center"});
+
+            aw.ctx.shadowColor = "#FFF";
+            let modeName = "EASY MODE";
+            if (difficultyMode === 1)
+            {
+                modeName = "HARD MODE"
+            }
+            else if (difficultyMode === 2)
+            {
+                modeName = "ULTRA MEGA MODE";
+            }
+            aw.drawText({text:`${modeName} COMPLETE`, x:screenWidth*0.5, y:180, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+            aw.drawText({text:"CLICK TO QUIT TO MAIN MENU", x:screenWidth*0.5, y:200, fontSize:14, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+        }
+        else
+        {
+            aw.ctx.shadowColor = "#333";
+            aw.ctx.fillStyle = "#333";
+            aw.ctx.fillRect(0, 52, screenWidth, 140);
+
+            aw.ctx.shadowColor = "#F00";
+            aw.drawText({text:"GAME OVER", x:screenWidth*0.5, y:100, fontSize:40, fontStyle:"bold", color:"#F00", textAlign:"center"});
+
+            aw.ctx.shadowColor = "#FFF";
+            let modeName = "EASY MODE";
+            if (difficultyMode === 1)
+            {
+                modeName = "HARD MODE"
+            }
+            else if (difficultyMode === 2)
+            {
+                modeName = "ULTRA MEGA MODE";
+            }
+            aw.drawText({text:modeName, x:screenWidth*0.5, y:100 + 30, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+            aw.drawText({text:`SCORE: ${levelIdx + 1}`, x:screenWidth*0.5, y:100 + 55, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+            aw.drawText({text:`BEST: ${getBest() + 1}`, x:screenWidth*0.5, y:100 + 80, fontSize:20, fontStyle:"bold", color:"#FFF", textAlign:"center"});
+        }
     }
 }
 
@@ -1989,6 +2430,9 @@ function gameOver(deltaTime)
         aw.ctx.shadowBlur = 20;
         aw.state = mainMenu;
         aw.statePost = undefined;
+
+        aw.playNote("a", 4, 0.05, 0.0);
+        aw.playNote("b", 4, 0.05, 0.05);
     }
 
     updateCameraShake(deltaTime);

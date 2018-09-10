@@ -21,6 +21,8 @@ class Player
         this.isDead = false;
         this.angle = 0;
         this.rotSpeed = 180;
+        this.xLineDir = 0;
+        this.yLineDir = 0;
 
         let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
@@ -59,6 +61,8 @@ class Player
         let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
         this.y = posInfo.y;
+        this.xLineDir = posInfo.xDir;
+        this.yLineDir = posInfo.yDir;
 
         // Check for death
         aw.entities.forEach(entity =>
@@ -85,7 +89,7 @@ class Player
             if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
             {
                 this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
-                this.speed = -this.speed;
+                //this.speed = -this.speed;
                 this.xJump = this.x;
                 this.yJump = this.y;
 
@@ -159,6 +163,12 @@ class Player
 
                     this.isJumping = false;
                     this.curState = this.onLineUpdate;
+
+                    let dot = posInfo.xDir*this.xLineDir + posInfo.yDir*this.yLineDir;
+                    if (dot < 0.0)
+                    {
+                        this.speed = -this.speed;
+                    }
 
                     startCameraShake(2.5, 0.15);
 
