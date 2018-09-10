@@ -12,6 +12,8 @@ class L06 extends Level
         this.linePoints[0].push({x:50, y: -200});
         this.linePoints[0].push({x:50, y: -20});
         this.linePoints[0].push({x:-200, y: -20});
+
+        this.name = "BOOMERANG";
     }
 
     addItems()

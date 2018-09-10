@@ -25,6 +25,8 @@ class L09 extends Level
             let y = Math.sin(angle) * radius;
             this.linePoints[1].push({x:x, y:y});
         }
+
+        this.name = "DONUT";
     }
 
     addItems()

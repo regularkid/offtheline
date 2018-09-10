@@ -7,6 +7,8 @@ class L01 extends Level
         this.linePoints[0].push({x:100, y: 100});
         this.linePoints[0].push({x:100, y: -100});
         this.linePoints[0].push({x:-100, y: -100});
+
+        this.name = "THE BOX";
     }
 
     addItems()

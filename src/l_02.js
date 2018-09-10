@@ -7,6 +7,8 @@ class L02 extends Level
         this.linePoints[0].push({x:200, y: 100});
         this.linePoints[0].push({x:200, y: -100});
         this.linePoints[0].push({x:-200, y: -100});
+
+        this.name = "PEGBOARD";
     }
 
     addItems()

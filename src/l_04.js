@@ -7,6 +7,8 @@ class L04 extends Level
         this.linePoints[0].push({x:60, y: 150});
         this.linePoints[0].push({x:60, y: -150});
         this.linePoints[0].push({x:-60, y: -150});
+
+        this.name = "NEEDLE";
     }
 
     addItems()

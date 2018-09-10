@@ -23,6 +23,8 @@ class L18 extends Level
         this.normals[1].push({x:0, y:1});
         this.normals[1].push({x:0, y:1});
         this.normals[1].push({x:-1, y:0});
+
+        this.name = "X FACTOR";
     }
 
     addItems()

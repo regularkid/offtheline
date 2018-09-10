@@ -22,6 +22,8 @@ class L07 extends Level
         this.normals.push([]);
         this.normals[2].push({x:0, y:-1});
         this.normals[2].push({x:0, y:-1});
+
+        this.name = "SPLITTER";
     }
 
     addItems()

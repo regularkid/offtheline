@@ -16,6 +16,8 @@ class L17 extends Level
 
         this.linePoints[0].push({x:-50, y:150});
         this.linePoints[0].push({x:50, y:150});
+
+        this.name = "SHELL";
     }
 
     addItems()

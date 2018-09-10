@@ -10,6 +10,7 @@ class L05 extends Level
 
         this.levelTime = 12.0;
         this.timer = this.levelTime;
+        this.name = "PATIENCE";
     }
 
     addItems()

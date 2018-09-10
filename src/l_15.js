@@ -25,6 +25,8 @@ class L15 extends Level
         this.linePoints[3].push({x:260, y: -25});
         this.linePoints[3].push({x:280, y: -25});
         this.linePoints[3].push({x:280, y: 25});
+
+        this.name = "BAR GAPS";
     }
 
     addItems()

@@ -35,6 +35,8 @@ class L14 extends Level
         this.normals.push([]);
         this.normals[3].push({x:-0.707, y:-0.707});
         this.normals[3].push({x:-0.707, y:-0.707});
+
+        this.name = "ALIENS";
     }
 
     addItems()

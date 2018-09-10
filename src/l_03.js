@@ -13,6 +13,8 @@ class L03 extends Level
             let y = Math.sin(angle) * radius;
             this.linePoints[0].push({x:x, y:y});
         }
+
+        this.name = "ORBIT";
     }
 
     addItems()

@@ -331,14 +331,15 @@ function drawUI(deltaTime)
 
     // Level #
     aw.ctx.shadowColor = "#FFF";
-    aw.drawText({text:`LEVEL ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
+    aw.drawText({text:`LEVEL ${(levelIdx + 1)} - ${level ? level.name : ""}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
     aw.drawText({text:`BEST: ${getBest() + 1}`, x:10, y:50, fontSize:15, fontStyle:"bold", color:"#FFF"});
 
     // Lives
     if (difficultyMode === 2)
     {
         aw.ctx.shadowColor = "#08F";
-        aw.drawText({text:"UNLIMITED LIVES - PRESS 'ESC' TO QUIT", x:328, y:25, fontSize:15, fontStyle:"bold", color:"#08F"});
+        aw.drawText({text:"UNLIMITED LIVES", x:630, y:25, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
+        aw.drawText({text:"PRESS 'ESC' TO QUIT", x:630, y:45, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
     }
     else
     {

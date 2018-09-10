@@ -32,6 +32,8 @@ class L08 extends Level
 
         this.levelTime = 12.0;
         this.timer = this.levelTime;
+
+        this.name = "TRIPLE SHOT";
     }
 
     addItems()

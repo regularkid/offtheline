@@ -38,14 +38,16 @@ class L16 extends Level
         this.normals[4].push({x:0, y: 1});
 
         this.linePoints.push([]);
-        this.linePoints[5].push({x:160, y:200});
-        this.linePoints[5].push({x:285, y:200});
+        this.linePoints[5].push({x:160, y:180});
+        this.linePoints[5].push({x:285, y:180});
         this.normals.push([]);
         this.normals[5].push({x:0, y: -1});
         this.normals[5].push({x:0, y: -1});
 
         this.levelTime = 12.0;
         this.timer = this.levelTime;
+
+        this.name = "ZIG ZAG";
     }
 
     addItems()

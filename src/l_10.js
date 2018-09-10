@@ -15,6 +15,8 @@ class L10 extends Level
         this.normals.push([]);
         this.normals[1].push({x:-1, y:0});
         this.normals[1].push({x:-1, y:0});
+
+        this.name = "LONG DISTANCE";
     }
 
     addItems()

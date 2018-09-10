@@ -13,6 +13,8 @@ class L11 extends Level
         this.linePoints[0].push({x:225, y: -50});
         this.linePoints[0].push({x:-225, y: -50});
         this.linePoints[0].push({x:-225, y: 0});
+
+        this.name = "CIRCUIT";
     }
 
     addItems()

@@ -25,6 +25,8 @@ class L12 extends Level
         this.linePoints[3].push({x:-200, y:-110});
         this.linePoints[3].push({x:-175, y:-110});
         this.linePoints[3].push({x:-175, y:-85});
+
+        this.name = "QUADS";
     }
 
     addItems()

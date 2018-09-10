@@ -57,7 +57,7 @@ gulp.task("build", ["zip"], () =>
 
 gulp.task("zip", ["minify_js"], () =>
     gulp.src(outputFiles)
-        .pipe(zip("CommsOffline.zip"))
+        .pipe(zip("offtheline.zip"))
         .pipe(gulp.dest("./build/"))
 );
 

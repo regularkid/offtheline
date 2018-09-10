@@ -1,7 +1,4 @@
 Add mobile touch events
-Add VFX for life lost in UI
-Add VFX trail on jump
-Add VFX on land
 Verify final build
 Create screenshots
 Create game description
@@ -12,7 +9,6 @@ Add debug cheats?
 Clean up code
 SFX Toggle
 Confirmation for quitting ultra mega mode
-Names for each level
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
@@ -37,3 +33,7 @@ Names for each level
 ----- Fix direction issue after jumping (level 18)
 ----- Add levels 11 - 20
 ----- Tune times for each level
+----- Names for each level
+xxxxx Add VFX for life lost in UI
+xxxxx Add VFX trail on jump
+xxxxx Add VFX on land

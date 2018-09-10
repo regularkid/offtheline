@@ -7,6 +7,8 @@ class L20 extends Level
         this.linePoints[0].push({x:100, y: 100});
         this.linePoints[0].push({x:100, y: -100});
         this.linePoints[0].push({x:-100, y: -100});
+
+        this.name = "REVENGE OF THE BOX";
     }
 
     addItems()

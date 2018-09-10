@@ -243,6 +243,8 @@ class Player
         this.isDead = false;
         this.angle = 0;
         this.rotSpeed = 180;
+        this.xLineDir = 0;
+        this.yLineDir = 0;
 
         let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
@@ -281,6 +283,8 @@ class Player
         let posInfo = level.getPosInfo(this.curLevelGroup, this.curLineDist);
         this.x = posInfo.x;
         this.y = posInfo.y;
+        this.xLineDir = posInfo.xDir;
+        this.yLineDir = posInfo.yDir;
 
         // Check for death
         aw.entities.forEach(entity =>
@@ -307,7 +311,7 @@ class Player
             if (this.lastLeftButtonClickedDeltaTime <= this.maxButtonClickLookBackTime)
             {
                 this.jumpVel = {x:posInfo.nx * this.jumpSpeed, y:posInfo.ny * this.jumpSpeed};
-                this.speed = -this.speed;
+                //this.speed = -this.speed;
                 this.xJump = this.x;
                 this.yJump = this.y;
 
@@ -381,6 +385,12 @@ class Player
 
                     this.isJumping = false;
                     this.curState = this.onLineUpdate;
+
+                    let dot = posInfo.xDir*this.xLineDir + posInfo.yDir*this.yLineDir;
+                    if (dot < 0.0)
+                    {
+                        this.speed = -this.speed;
+                    }
 
                     startCameraShake(2.5, 0.15);
 
@@ -720,18 +730,20 @@ class Level
                 let ratio = (distance - curTotalDistance) / this.segLengths[group][i];
                 let p1 = i;
                 let p2 = (i + 1) % this.linePoints[group].length;
-                let xInterp = this.linePoints[group][p1].x + (this.linePoints[group][p2].x - this.linePoints[group][p1].x)*ratio;
-                let yInterp = this.linePoints[group][p1].y + (this.linePoints[group][p2].y - this.linePoints[group][p1].y)*ratio;
+                let xDir = this.linePoints[group][p2].x - this.linePoints[group][p1].x;
+                let yDir = this.linePoints[group][p2].y - this.linePoints[group][p1].y;
+                let xInterp = this.linePoints[group][p1].x + xDir*ratio;
+                let yInterp = this.linePoints[group][p1].y + yDir*ratio;
 
                 if (this.normals[group] !== undefined && this.normals[group][i] !== undefined)
                 {
-                    return {x:xInterp, y:yInterp, nx:this.normals[group][i].x, ny:this.normals[group][i].y};
+                    return {x:xInterp, y:yInterp, nx:this.normals[group][i].x, ny:this.normals[group][i].y, xDir:xDir, yDir:yDir};
                 }
                 else
                 {
                     let xDir = (this.linePoints[group][p2].x - this.linePoints[group][p1].x) / this.segLengths[group][i];
                     let yDir = (this.linePoints[group][p2].y - this.linePoints[group][p1].y) / this.segLengths[group][i];
-                    return {x:xInterp, y:yInterp, nx:yDir, ny:-xDir};
+                    return {x:xInterp, y:yInterp, nx:yDir, ny:-xDir, xDir:xDir, yDir:yDir};
                 }
             }
 
@@ -792,6 +804,8 @@ class L01 extends Level
         this.linePoints[0].push({x:100, y: 100});
         this.linePoints[0].push({x:100, y: -100});
         this.linePoints[0].push({x:-100, y: -100});
+
+        this.name = "THE BOX";
     }
 
     addItems()
@@ -824,6 +838,8 @@ class L02 extends Level
         this.linePoints[0].push({x:200, y: 100});
         this.linePoints[0].push({x:200, y: -100});
         this.linePoints[0].push({x:-200, y: -100});
+
+        this.name = "PEGBOARD";
     }
 
     addItems()
@@ -854,6 +870,8 @@ class L03 extends Level
             let y = Math.sin(angle) * radius;
             this.linePoints[0].push({x:x, y:y});
         }
+
+        this.name = "ORBIT";
     }
 
     addItems()
@@ -874,6 +892,8 @@ class L04 extends Level
         this.linePoints[0].push({x:60, y: 150});
         this.linePoints[0].push({x:60, y: -150});
         this.linePoints[0].push({x:-60, y: -150});
+
+        this.name = "NEEDLE";
     }
 
     addItems()
@@ -900,6 +920,7 @@ class L05 extends Level
 
         this.levelTime = 12.0;
         this.timer = this.levelTime;
+        this.name = "PATIENCE";
     }
 
     addItems()
@@ -941,6 +962,8 @@ class L06 extends Level
         this.linePoints[0].push({x:50, y: -200});
         this.linePoints[0].push({x:50, y: -20});
         this.linePoints[0].push({x:-200, y: -20});
+
+        this.name = "BOOMERANG";
     }
 
     addItems()
@@ -988,6 +1011,8 @@ class L07 extends Level
         this.normals.push([]);
         this.normals[2].push({x:0, y:-1});
         this.normals[2].push({x:0, y:-1});
+
+        this.name = "SPLITTER";
     }
 
     addItems()
@@ -1039,6 +1064,8 @@ class L08 extends Level
 
         this.levelTime = 12.0;
         this.timer = this.levelTime;
+
+        this.name = "TRIPLE SHOT";
     }
 
     addItems()
@@ -1083,6 +1110,8 @@ class L09 extends Level
             let y = Math.sin(angle) * radius;
             this.linePoints[1].push({x:x, y:y});
         }
+
+        this.name = "DONUT";
     }
 
     addItems()
@@ -1122,6 +1151,8 @@ class L10 extends Level
         this.normals.push([]);
         this.normals[1].push({x:-1, y:0});
         this.normals[1].push({x:-1, y:0});
+
+        this.name = "LONG DISTANCE";
     }
 
     addItems()
@@ -1155,6 +1186,8 @@ class L11 extends Level
         this.linePoints[0].push({x:225, y: -50});
         this.linePoints[0].push({x:-225, y: -50});
         this.linePoints[0].push({x:-225, y: 0});
+
+        this.name = "CIRCUIT";
     }
 
     addItems()
@@ -1202,6 +1235,8 @@ class L12 extends Level
         this.linePoints[3].push({x:-200, y:-110});
         this.linePoints[3].push({x:-175, y:-110});
         this.linePoints[3].push({x:-175, y:-85});
+
+        this.name = "QUADS";
     }
 
     addItems()
@@ -1269,6 +1304,8 @@ class L13 extends Level
         this.linePoints[0].push({x:-280, y:-10});
         this.linePoints[0].push({x:-280, y:10});
         this.linePoints[0].push({x:-300, y:20});
+
+        this.name = "RAZOR";
     }
 
     addItems()
@@ -1321,6 +1358,8 @@ class L14 extends Level
         this.normals.push([]);
         this.normals[3].push({x:-0.707, y:-0.707});
         this.normals[3].push({x:-0.707, y:-0.707});
+
+        this.name = "ALIENS";
     }
 
     addItems()
@@ -1368,6 +1407,8 @@ class L15 extends Level
         this.linePoints[3].push({x:260, y: -25});
         this.linePoints[3].push({x:280, y: -25});
         this.linePoints[3].push({x:280, y: 25});
+
+        this.name = "BAR GAPS";
     }
 
     addItems()
@@ -1437,11 +1478,16 @@ class L16 extends Level
         this.normals[4].push({x:0, y: 1});
 
         this.linePoints.push([]);
-        this.linePoints[5].push({x:160, y:200});
-        this.linePoints[5].push({x:285, y:200});
+        this.linePoints[5].push({x:160, y:180});
+        this.linePoints[5].push({x:285, y:180});
         this.normals.push([]);
         this.normals[5].push({x:0, y: -1});
         this.normals[5].push({x:0, y: -1});
+
+        this.levelTime = 12.0;
+        this.timer = this.levelTime;
+
+        this.name = "ZIG ZAG";
     }
 
     addItems()
@@ -1496,6 +1542,8 @@ class L17 extends Level
 
         this.linePoints[0].push({x:-50, y:150});
         this.linePoints[0].push({x:50, y:150});
+
+        this.name = "SHELL";
     }
 
     addItems()
@@ -1532,31 +1580,49 @@ class L18 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-250, y:0});
+        this.linePoints[0].push({x:-250, y:50});
+        this.linePoints[0].push({x:250, y:50});
+        this.linePoints[0].push({x:-250, y:50});
+        this.normals.push([]);
+        this.normals[0].push({x:1, y:0});
+        this.normals[0].push({x:0, y:-1});
+        this.normals[0].push({x:0, y:-1});
+        this.normals[0].push({x:1, y:0});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:250, y:0});
+        this.linePoints[1].push({x:250, y:-50});
+        this.linePoints[1].push({x:-250, y:-50});
+        this.linePoints[1].push({x:250, y:-50});
+        this.normals.push([]);
+        this.normals[1].push({x:-1, y:0});
+        this.normals[1].push({x:0, y:1});
+        this.normals[1].push({x:0, y:1});
+        this.normals[1].push({x:-1, y:0});
+
+        this.name = "X FACTOR";
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Coin(0, -25));
+        aw.addEntity(new Coin(0, 25));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        aw.addEntity(new Coin(100, -25));
+        aw.addEntity(new Coin(100, 25));
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(-100, -25));
+        aw.addEntity(new Coin(-100, 25));
+
+        aw.addEntity(new Coin(200, -25));
+        aw.addEntity(new Coin(200, 25));
+
+        aw.addEntity(new Coin(-200, -25));
+        aw.addEntity(new Coin(-200, 25));
+
+        aw.addEntity(new Wall(200, 0, 80, 0, 270, -400, 0, 0.75, 0));
+        aw.addEntity(new Wall(200, 0, 80, 90, 270, -400, 0, 0.75, 0));
     }
 }
 class L19 extends Level
@@ -1564,31 +1630,106 @@ class L19 extends Level
     addPoints()
     {
         this.linePoints.push([]);
-        this.linePoints[0].push({x:-100, y:100});
-        this.linePoints[0].push({x:100, y: 100});
-        this.linePoints[0].push({x:100, y: -100});
-        this.linePoints[0].push({x:-100, y: -100});
+        this.linePoints[0].push({x:-150, y:150});
+        this.linePoints[0].push({x:-200, y:150});
+        this.linePoints[0].push({x:-200, y:100});
+        this.linePoints[0].push({x:-200, y:150});
+        this.normals.push([]);
+        this.normals[0].push({x:0, y:-1});
+        this.normals[0].push({x:1, y:0});
+        this.normals[0].push({x:1, y:0});
+        this.normals[0].push({x:0, y:-1});
+
+        this.linePoints.push([]);
+        this.linePoints[1].push({x:-150, y:0});
+        this.linePoints[1].push({x:-200, y:0});
+        this.linePoints[1].push({x:-200, y:50});
+        this.linePoints[1].push({x:-200, y:0});
+        this.normals.push([]);
+        this.normals[1].push({x:0, y:1});
+        this.normals[1].push({x:1, y:0});
+        this.normals[1].push({x:1, y:0});
+        this.normals[1].push({x:0, y:1});
+
+        this.linePoints.push([]);
+        this.linePoints[2].push({x:150, y:50});
+        this.linePoints[2].push({x:200, y:50});
+        this.linePoints[2].push({x:200, y:0});
+        this.linePoints[2].push({x:200, y:50});
+        this.normals.push([]);
+        this.normals[2].push({x:0, y:-1});
+        this.normals[2].push({x:-1, y:0});
+        this.normals[2].push({x:-1, y:0});
+        this.normals[2].push({x:0, y:-1});
+
+        this.linePoints.push([]);
+        this.linePoints[3].push({x:150, y:-100});
+        this.linePoints[3].push({x:200, y:-100});
+        this.linePoints[3].push({x:200, y:-50});
+        this.linePoints[3].push({x:200, y:-100});
+        this.normals.push([]);
+        this.normals[3].push({x:0, y:1});
+        this.normals[3].push({x:-1, y:0});
+        this.normals[3].push({x:-1, y:0});
+        this.normals[3].push({x:0, y:1});
+
+        this.linePoints.push([]);
+        this.linePoints[4].push({x:-150, y:-50});
+        this.linePoints[4].push({x:-200, y:-50});
+        this.linePoints[4].push({x:-200, y:-100});
+        this.linePoints[4].push({x:-200, y:-50});
+        this.normals.push([]);
+        this.normals[4].push({x:0, y:-1});
+        this.normals[4].push({x:1, y:0});
+        this.normals[4].push({x:1, y:0});
+        this.normals[4].push({x:0, y:-1});
+
+        this.linePoints.push([]);
+        this.linePoints[5].push({x:-150, y:-200});
+        this.linePoints[5].push({x:-200, y:-200});
+        this.linePoints[5].push({x:-200, y:-150});
+        this.linePoints[5].push({x:-200, y:-200});
+        this.normals.push([]);
+        this.normals[5].push({x:0, y:1});
+        this.normals[5].push({x:1, y:0});
+        this.normals[5].push({x:1, y:0});
+        this.normals[5].push({x:0, y:1});
+
+        this.linePoints.push([]);
+        this.linePoints[6].push({x:150, y:-200});
+        this.linePoints[6].push({x:200, y:-200});
+        this.linePoints[6].push({x:200, y:-150});
+        this.linePoints[6].push({x:200, y:-200});
+        this.normals.push([]);
+        this.normals[6].push({x:0, y:1});
+        this.normals[6].push({x:-1, y:0});
+        this.normals[6].push({x:-1, y:0});
+        this.normals[6].push({x:0, y:1});
+
+        this.levelTime = 12.0;
+        this.timer = this.levelTime;
+        this.name = "SNAKE";
     }
 
     addItems()
     {
-        aw.addEntity(new Coin(0, 0));
-        aw.addEntity(new Coin(-50, 0));
-        aw.addEntity(new Coin(50, 0));
-        aw.addEntity(new Coin(-25, 0));
-        aw.addEntity(new Coin(25, 0));
+        aw.addEntity(new Coin(-175, 125));
+        aw.addEntity(new Coin(-175, 75));
+        aw.addEntity(new Coin(-175, 25));
 
-        aw.addEntity(new Coin(0, 50));
-        aw.addEntity(new Coin(-50, 50));
-        aw.addEntity(new Coin(50, 50));
-        aw.addEntity(new Coin(-25, 50));
-        aw.addEntity(new Coin(25, 50));
+        for (let i = 0; i < 7; i++)
+        {
+            aw.addEntity(new Coin(-125 + 50*i, 25));
+            aw.addEntity(new Coin(-125 + 50*i, -75));
+            aw.addEntity(new Coin(-125 + 50*i, -175));
+        }
 
-        aw.addEntity(new Coin(0, -50));
-        aw.addEntity(new Coin(-50, -50));
-        aw.addEntity(new Coin(50, -50));
-        aw.addEntity(new Coin(-25, -50));
-        aw.addEntity(new Coin(25, -50));
+        aw.addEntity(new Coin(175, -25));
+        aw.addEntity(new Coin(-175, -75));
+        aw.addEntity(new Coin(-175, -125));
+        aw.addEntity(new Coin(-175, -175));
+
+        aw.addEntity(new Wall(0, -25, 150, 0, 180));
     }
 }
 class L20 extends Level
@@ -1600,6 +1741,8 @@ class L20 extends Level
         this.linePoints[0].push({x:100, y: 100});
         this.linePoints[0].push({x:100, y: -100});
         this.linePoints[0].push({x:-100, y: -100});
+
+        this.name = "REVENGE OF THE BOX";
     }
 
     addItems()
@@ -1621,6 +1764,9 @@ class L20 extends Level
         aw.addEntity(new Coin(50, -50));
         aw.addEntity(new Coin(-25, -50));
         aw.addEntity(new Coin(25, -50));
+
+        aw.addEntity(new Wall(-32, 32, 50, 0, 180));
+        aw.addEntity(new Wall(38, -50, 50, 90, 0, 0, 50, 1.0, 0.5));
     }
 }
 class Aw
@@ -2104,7 +2250,7 @@ function mainMenu(deltaTime)
     {
         difficultyMode = selectedOption;
         lives = difficultyMode === 0 ? 10 : 5;
-        levelIdx = 4;
+        levelIdx = 0;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
         aw.ctx.shadowBlur = 0;
@@ -2290,16 +2436,16 @@ function initLevel(idx)
     else if (idx == 7) { level = new L08() }
     else if (idx == 8) { level = new L09() }
     else if (idx == 9) { level = new L10() }
-    else if (idx == 10) { level = new L11() }
-    else if (idx == 11) { level = new L12() }
-    else if (idx == 12) { level = new L13() }
-    else if (idx == 13) { level = new L14() }
-    else if (idx == 14) { level = new L15() }
+    else if (idx == 10) { level = new L15() }
+    else if (idx == 11) { level = new L13() }
+    else if (idx == 12) { level = new L17() }
+    else if (idx == 13) { level = new L20() }
+    else if (idx == 14) { level = new L12() }
     else if (idx == 15) { level = new L16() }
-    else if (idx == 16) { level = new L17() }
-    else if (idx == 17) { level = new L18() }
+    else if (idx == 16) { level = new L18() }
+    else if (idx == 17) { level = new L11() }
     else if (idx == 18) { level = new L19() }
-    else if (idx == 19) { level = new L20() }
+    else if (idx == 19) { level = new L14() }
     aw.addEntity(level);
 
     player = new Player();
@@ -2331,14 +2477,15 @@ function drawUI(deltaTime)
 
     // Level #
     aw.ctx.shadowColor = "#FFF";
-    aw.drawText({text:`LEVEL ${(levelIdx + 1)}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
+    aw.drawText({text:`LEVEL ${(levelIdx + 1)} - ${level ? level.name : ""}`, x:10, y:30, fontSize:24, fontStyle:"bold"});
     aw.drawText({text:`BEST: ${getBest() + 1}`, x:10, y:50, fontSize:15, fontStyle:"bold", color:"#FFF"});
 
     // Lives
     if (difficultyMode === 2)
     {
         aw.ctx.shadowColor = "#08F";
-        aw.drawText({text:"UNLIMITED LIVES - PRESS 'ESC' TO QUIT", x:328, y:25, fontSize:15, fontStyle:"bold", color:"#08F"});
+        aw.drawText({text:"UNLIMITED LIVES", x:630, y:25, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
+        aw.drawText({text:"PRESS 'ESC' TO QUIT", x:630, y:45, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
     }
     else
     {

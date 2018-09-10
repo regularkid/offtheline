@@ -40,6 +40,8 @@ class L13 extends Level
         this.linePoints[0].push({x:-280, y:-10});
         this.linePoints[0].push({x:-280, y:10});
         this.linePoints[0].push({x:-300, y:20});
+
+        this.name = "RAZOR";
     }
 
     addItems()
