@@ -24,7 +24,7 @@ function mainMenu(deltaTime)
     let selectedOption = -1;
     for (let i = 0; i < menuOptions.length; i++)
     {
-        let isHighlighted = aw.mousePos.y >= yMenu + yMenuStep*i && aw.mousePos.y < yMenu + yMenuStep*(i + 1) && aw.mousePos.x < menuOptions[i].width;
+        let isHighlighted = aw.mousePos.y >= yMenu + yMenuStep*i && aw.mousePos.y < yMenu + yMenuStep*(i + 1) && aw.mousePos.x >= 0 && aw.mousePos.x < menuOptions[i].width;
         let optionColor = isHighlighted ? "#FF0" : "#FFF";
         
         aw.ctx.shadowColor = optionColor;
