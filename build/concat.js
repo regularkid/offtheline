@@ -2384,7 +2384,9 @@ class Aw
         {
             this.mouseDelta.x += e.movementX;
             this.mouseDelta.y += e.movementY;
-            this.mousePos = {x: e.clientX, y: e.clientY};
+
+            var rect = this.canvas.getBoundingClientRect();
+            this.mousePos = {x: e.clientX - rect.left, y: e.clientY - rect.top};
         });
 
         window.addEventListener("mousedown", e =>
