@@ -296,6 +296,16 @@ class Aw
 
         oscillator.type = type !== undefined ? type : "sine";
         oscillator.frequency.setValueAtTime(noteFrequency, this.audioCtx.currentTime);
+
+        if (length !== undefined)
+        {
+            length *= 2;
+        }
+
+        if (delay !== undefined)
+        {
+            delay *= 2;
+        }
         
         oscillator.connect(this.audioCtx.destination);
         oscillator.start(this.audioCtx.currentTime + (delay !== undefined ? delay : 0));

@@ -1,7 +1,5 @@
 Verify final build
-Make GitHub repos public
 Create postmortem
-Upload to Super micro fun
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
@@ -33,6 +31,8 @@ Upload to Super micro fun
 ----- Fix audio in chrome issue
 ----- Add mobile touch events
 ----- Create screenshots
+----- Upload to Super micro fun
+----- Make GitHub repos public
 xxxxx Add VFX for life lost in UI
 xxxxx Add VFX trail on jump
 xxxxx Add VFX on land
