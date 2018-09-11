@@ -294,7 +294,7 @@ class Aw
             noteFrequency *= Math.pow(2, octave);
         }
 
-        oscillator.type = type !== undefined ? type : "triangle";
+        oscillator.type = type !== undefined ? type : "sine";
         oscillator.frequency.setValueAtTime(noteFrequency, this.audioCtx.currentTime);
         
         oscillator.connect(this.audioCtx.destination);

@@ -1,5 +1,4 @@
 Verify final build
-Create screenshots
 Make GitHub repos public
 Create postmortem
 Upload to Super micro fun
@@ -33,6 +32,7 @@ Upload to Super micro fun
 ----- Create game description
 ----- Fix audio in chrome issue
 ----- Add mobile touch events
+----- Create screenshots
 xxxxx Add VFX for life lost in UI
 xxxxx Add VFX trail on jump
 xxxxx Add VFX on land

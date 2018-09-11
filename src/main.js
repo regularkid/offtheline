@@ -12,8 +12,10 @@ var endLevelTime = 0;
 var lives = 5;
 var difficultyMode = 0;
 
-function init()
+function init(deltaTime)
 {
+    renderBackgroundSpeedLines(deltaTime);
+
     if (aw.mouseLeftButtonJustPressed)
     {
         aw.state = mainMenu;

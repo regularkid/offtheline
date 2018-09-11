@@ -2,6 +2,7 @@ var gulp = require("gulp");
 var concat = require("gulp-concat");
 var htmlreplace = require("gulp-html-replace");
 var closureCompiler = require("google-closure-compiler").gulp();
+var uglify = require("gulp-uglify");
 const zip = require("gulp-zip");
 
 var sourceFiles =

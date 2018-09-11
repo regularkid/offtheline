@@ -57,12 +57,22 @@ function dot(v1, v2)
 }
 function getBest()
 {
+    if (window === undefined || window.localStorage === undefined)
+    {
+        return 0;
+    }
+
     let best = window.localStorage.getItem(`best_${difficultyMode}`);
     return best !== null ? parseInt(best, 10) : 0;
 }
 
 function setBest()
 {
+    if (window === undefined || window.localStorage === undefined)
+    {
+        return;
+    }
+
     window.localStorage.setItem(`best_${difficultyMode}`, Math.max(levelIdx.toString(), getBest()));
 }
 
@@ -877,7 +887,7 @@ function renderBackgroundSpeedLines(deltaTime)
     }
 
     aw.ctx.lineWidth = 2;
-    aw.ctx.strokeStyle = aw.state === mainMenu ? "#111" : "#090909";
+    aw.ctx.strokeStyle = aw.state === mainMenu || aw.state === init ? "#111" : "#090909";
     let shadowBlurSave = aw.ctx.shadowBlur;
     aw.ctx.shadowBlur = 0;
     
@@ -2333,7 +2343,7 @@ class Aw
             noteFrequency *= Math.pow(2, octave);
         }
 
-        oscillator.type = type !== undefined ? type : "triangle";
+        oscillator.type = type !== undefined ? type : "sine";
         oscillator.frequency.setValueAtTime(noteFrequency, this.audioCtx.currentTime);
         
         oscillator.connect(this.audioCtx.destination);
@@ -2482,8 +2492,10 @@ var endLevelTime = 0;
 var lives = 5;
 var difficultyMode = 0;
 
-function init()
+function init(deltaTime)
 {
+    renderBackgroundSpeedLines(deltaTime);
+
     if (aw.mouseLeftButtonJustPressed)
     {
         aw.state = mainMenu;

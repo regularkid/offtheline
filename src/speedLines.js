@@ -19,7 +19,7 @@ function renderBackgroundSpeedLines(deltaTime)
     }
 
     aw.ctx.lineWidth = 2;
-    aw.ctx.strokeStyle = aw.state === mainMenu ? "#111" : "#090909";
+    aw.ctx.strokeStyle = aw.state === mainMenu || aw.state === init ? "#111" : "#090909";
     let shadowBlurSave = aw.ctx.shadowBlur;
     aw.ctx.shadowBlur = 0;
     
