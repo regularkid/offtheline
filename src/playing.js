@@ -3,7 +3,7 @@ function playing(deltaTime)
     aw.ctx.shadowBlur = 10;
     renderBackgroundSpeedLines(deltaTime);
 
-    if (aw.keysJustPressed.escape && difficultyMode === 2)
+    if (aw.keysJustPressed["escape"] && difficultyMode === 2)
     {
         aw.clearAllEntities();
         aw.mouseLeftButtonJustPressed = false;
@@ -50,7 +50,7 @@ function playing(deltaTime)
             }
             else
             {
-                levelIdx = (levelIdx + 1) % Object.keys(levelClassMap).length;
+                levelIdx = (levelIdx + 1) % 20;
                 initLevel(levelIdx);
             }
         }

@@ -219,7 +219,7 @@ class Aw
 
     initAudio()
     {
-        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.soundOn = true;
 
         this.notes =
         {
@@ -237,17 +237,39 @@ class Aw
             "b": 30.87,
         }
 
-        let bufferSize = 2 * this.audioCtx.sampleRate * 6;
-        this.noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
-        this.noiseOutput = this.noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++)
+        window.addEventListener('click', () =>
         {
-            this.noiseOutput[i] = -1.0 + Math.random() * 2;
+            this.createAudioContext();
+        });
+    }
+
+    createAudioContext()
+    {
+        if (!this.audioCtx)
+        {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            let bufferSize = 2 * this.audioCtx.sampleRate * 6;
+            this.noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+            this.noiseOutput = this.noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++)
+            {
+                this.noiseOutput[i] = -1.0 + Math.random() * 2;
+            }
+        }
+        else
+        {
+            this.audioCtx.resume();
         }
     }
 
     playAudio(name, loop)
     {
+        if (!this.soundOn || !this.audioCtx)
+        {
+            return;
+        }
+
         this.getAsset(name).loop = loop !== undefined ? loop : false;
         this.getAsset(name).play();
     }
@@ -260,6 +282,11 @@ class Aw
 
     playNote(note, octave, length, delay, type)
     {
+        if (!this.soundOn || !this.audioCtx)
+        {
+            return;
+        }
+
         let oscillator = this.audioCtx.createOscillator();
         let noteFrequency = this.notes[note.toLowerCase()];
         if (octave !== undefined)
@@ -277,6 +304,11 @@ class Aw
 
     playNoise(length, delay)
     {
+        if (!this.soundOn || !this.audioCtx)
+        {
+            return;
+        }
+
         let whiteNoise = this.audioCtx.createBufferSource();
         whiteNoise.buffer = this.noiseBuffer;
         whiteNoise.loop = true;
@@ -318,6 +350,10 @@ class Aw
             else if (e.button === 2) { this.mouseRightButton = false; }
         });
 
+        window.addEventListener("touchstart", this.touch2Mouse, true);
+        window.addEventListener("touchmove", this.touch2Mouse, true);
+        window.addEventListener("touchend", this.touch2Mouse, true);
+
         this.keyToName =
         {
             "a": "a", "b": "b", "c": "c", "d": "d", "e": "e", "f": "f", "g": "g", "h": "h", "i": "i",
@@ -341,6 +377,26 @@ class Aw
         {
             this.setKeyState(e, false);
         });
+    }
+
+    touch2Mouse(e)
+    {
+        let theTouch = e.changedTouches[0];
+        let mouseEv;
+
+        switch(e.type)
+        {
+            case "touchstart": mouseEv="mousedown"; break;  
+            case "touchend":   mouseEv="mouseup"; break;
+            case "touchmove":  mouseEv="mousemove"; break;
+            default: return;
+        }
+
+        let mouseEvent = document.createEvent("MouseEvent");
+        mouseEvent.initMouseEvent(mouseEv, true, true, window, 1, theTouch.screenX, theTouch.screenY, theTouch.clientX, theTouch.clientY, false, false, false, false, 0, null);
+        theTouch.target.dispatchEvent(mouseEvent);
+
+        e.preventDefault();
     }
 
     setKeyState(event, isOn)

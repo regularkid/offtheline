@@ -11,35 +11,20 @@ var levelIdx = 0;
 var endLevelTime = 0;
 var lives = 5;
 var difficultyMode = 0;
-let levelClassMap =
-{
-    L01: L01,
-    L02: L02,
-    L03: L03,
-    L04: L04,
-    L05: L05,
-    L06: L06,
-    L07: L07,
-    L08: L08,
-    L09: L09,
-    L10: L10,
-    L11: L11,
-    L12: L12,
-    L13: L13,
-    L14: L14,
-    L15: L15,
-    L16: L16,
-    L17: L17,
-    L18: L18,
-    L19: L19,
-    L20: L20,
-};
 
 function init()
 {
-    aw.state = mainMenu;
-    aw.ctx.shadowBlur = 20;
+    if (aw.mouseLeftButtonJustPressed)
+    {
+        aw.state = mainMenu;
+        aw.mouseLeftButtonJustPressed = false;
 
-    aw.playNote("a", 4, 0.05, 0.0);
-    aw.playNote("b", 4, 0.05, 0.05);
+        aw.playNote("a", 4, 0.05, 0.0);
+        aw.playNote("b", 4, 0.05, 0.05);
+    }
+
+    // Click to play
+    aw.ctx.shadowBlur = 20;
+    aw.ctx.shadowColor = "#08F";
+    aw.drawText({text:"CLICK TO PLAY", x:screenWidth*0.5, y:screenHeight*0.5, fontSize:20, fontStyle:"bold", color:"#08F", textAlign:"center"});
 }

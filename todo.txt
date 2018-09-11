@@ -1,14 +1,8 @@
-Add mobile touch events
 Verify final build
 Create screenshots
-Create game description
 Make GitHub repos public
 Create postmortem
 Upload to Super micro fun
-Add debug cheats?
-Clean up code
-SFX Toggle
-Confirmation for quitting ultra mega mode
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
@@ -34,6 +28,14 @@ Confirmation for quitting ultra mega mode
 ----- Add levels 11 - 20
 ----- Tune times for each level
 ----- Names for each level
+----- SFX Toggle
+----- Fix compiled keyboard event issue
+----- Create game description
+----- Fix audio in chrome issue
+----- Add mobile touch events
 xxxxx Add VFX for life lost in UI
 xxxxx Add VFX trail on jump
 xxxxx Add VFX on land
+xxxxx Clean up code
+xxxxx Confirmation for quitting ultra mega mode
+xxxxx Add debug cheats?

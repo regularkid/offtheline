@@ -81,7 +81,7 @@ class Player
         if (!this.isDead)
         {
             this.lastLeftButtonClickedDeltaTime += deltaTime;
-            if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed.space)
+            if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed["space"])
             {
                 this.lastLeftButtonClickedDeltaTime = 0;
             }
@@ -162,6 +162,9 @@ class Player
                     this.isJumping = false;
                     this.curState = this.onLineUpdate;
 
+                    // Change direction if the line we jumped to is in the opposite direction
+                    // compared to the line we jumped from. This makes the player keep going
+                    // in the same direction that you were previously going.
                     let dot = posInfo.xDir*this.xLineDir + posInfo.yDir*this.yLineDir;
                     if (dot < 0.0)
                     {

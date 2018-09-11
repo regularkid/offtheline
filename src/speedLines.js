@@ -4,6 +4,12 @@ var speedLineSpeed = 4000;
 var numSpeedLinesPerFrame = 2;
 function renderBackgroundSpeedLines(deltaTime)
 {
+    // This shouldn't be here
+    if (aw.keysJustPressed["s"])
+    {
+        aw.soundOn = !aw.soundOn;
+    }
+
     aw.ctx.save();
     resetCamera();
 

@@ -23,7 +23,7 @@ function drawUI(deltaTime)
     {
         aw.ctx.shadowColor = "#08F";
         aw.drawText({text:"UNLIMITED LIVES", x:630, y:25, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
-        aw.drawText({text:"PRESS 'ESC' TO QUIT", x:630, y:45, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
+        aw.drawText({text:"PRESS [ESC] TO QUIT", x:630, y:45, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
     }
     else
     {
