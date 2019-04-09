@@ -57,17 +57,23 @@ var outputFiles =
     "./build/concat.min.js"
 ]
 
-gulp.task("build", ["zip"], () =>
+gulp.task("build_js", () =>
 {
+	return gulp.src(sourceFiles)
+            .pipe(concat("concat.js"))
+            .pipe(gulp.dest("./build/"));
 });
 
-gulp.task("zip", ["minify_js"], () =>
-    gulp.src(outputFiles)
-        .pipe(zip("offtheline.zip"))
-        .pipe(gulp.dest("./build/"))
-);
+gulp.task("build_html", (done) =>
+{
+    gulp.src("index.html")
+        .pipe(htmlreplace({ "js": "concat.min.js" }))
+        .pipe(gulp.dest("./build/"));
 
-gulp.task("minify_js", ["build_js", "build_html"], () =>
+    done();
+});
+
+gulp.task("minify_js", gulp.series("build_js", "build_html", () =>
 {
     return gulp.src("./build/concat.js")
         .pipe(closureCompiler(
@@ -80,18 +86,18 @@ gulp.task("minify_js", ["build_js", "build_html"], () =>
                 js_output_file: "concat.min.js"
             }))
         .pipe(gulp.dest("./build/"));
-});
+}));
 
-gulp.task("build_js", () =>
+gulp.task("zip", gulp.series("minify_js", (done) =>
 {
-	return gulp.src(sourceFiles)
-            .pipe(concat("concat.js"))
-            .pipe(gulp.dest("./build/"));
-});
+    gulp.src(outputFiles)
+        .pipe(zip("offtheline.zip"))
+        .pipe(gulp.dest("./build/"))
 
-gulp.task("build_html", () =>
+    done();
+}));
+
+gulp.task("build", gulp.series("zip", (done) =>
 {
-    gulp.src("index.html")
-        .pipe(htmlreplace({ "js": "concat.min.js" }))
-        .pipe(gulp.dest("./build/"));
-});
+    done();
+}));

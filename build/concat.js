@@ -2390,30 +2390,56 @@ class Aw
         this.mouseLeftButtonJustPressed = false;
         this.mouseRightButtonJustPressed = false;
 
-        window.addEventListener("mousemove", e =>
-        {
-            this.mouseDelta.x += e.movementX;
-            this.mouseDelta.y += e.movementY;
-
-            var rect = this.canvas.getBoundingClientRect();
-            this.mousePos = {x: e.clientX - rect.left, y: e.clientY - rect.top};
-        });
-
-        window.addEventListener("mousedown", e =>
+        this.canvas.addEventListener("mousedown", e =>
         {
             if (e.button === 0) { this.mouseLeftButton = true; this.mouseLeftButtonJustPressed = true; }
             else if (e.button === 2) { this.mouseRightButton = true; this.mouseRightButtonJustPressed = true; }
-        });
+            this.setTouchPos(e);
+            e.preventDefault();
+        }, true);
 
-        window.addEventListener("mouseup", e =>
+        this.canvas.addEventListener("mouseup", e =>
         {
             if (e.button === 0) { this.mouseLeftButton = false; }
             else if (e.button === 2) { this.mouseRightButton = false; }
-        });
+            e.preventDefault();
+        }, true);
 
-        window.addEventListener("touchstart", this.touch2Mouse, true);
-        window.addEventListener("touchmove", this.touch2Mouse, true);
-        window.addEventListener("touchend", this.touch2Mouse, true);
+        this.canvas.addEventListener("mousemove", e =>
+        {
+            this.mouseDelta.x += e.movementX;
+            this.mouseDelta.y += e.movementY;
+            this.setTouchPos(e);
+            e.preventDefault();
+        }, true );
+
+        this.canvas.addEventListener("touchstart", e =>
+        {
+            this.mouseLeftButton = true;
+            this.mouseLeftButtonJustPressed = true;
+            this.setTouchPos(e.touches[0]);
+            e.preventDefault();
+        }, true );
+
+        this.canvas.addEventListener("touchend", e =>
+        {
+            this.mouseLeftButton = false;
+            this.mouseLeftButtonJustPressed = false;
+            e.preventDefault();
+        }, true );
+
+        this.canvas.addEventListener("touchcancel", e =>
+        {
+            this.mouseLeftButton = false;
+            this.mouseLeftButtonJustPressed = false
+            e.preventDefault();
+        }, true );
+
+        this.canvas.addEventListener("touchmove", e =>
+        {
+            this.setTouchPos(e.touches[0]);
+            e.preventDefault();
+        }, true );
 
         this.keyToName =
         {
@@ -2440,24 +2466,9 @@ class Aw
         });
     }
 
-    touch2Mouse(e)
+    setTouchPos(e)
     {
-        let theTouch = e.changedTouches[0];
-        let mouseEv;
-
-        switch(e.type)
-        {
-            case "touchstart": mouseEv="mousedown"; break;  
-            case "touchend":   mouseEv="mouseup"; break;
-            case "touchmove":  mouseEv="mousemove"; break;
-            default: return;
-        }
-
-        let mouseEvent = document.createEvent("MouseEvent");
-        mouseEvent.initMouseEvent(mouseEv, true, true, window, 1, theTouch.screenX, theTouch.screenY, theTouch.clientX, theTouch.clientY, false, false, false, false, 0, null);
-        theTouch.target.dispatchEvent(mouseEvent);
-
-        e.preventDefault();
+        this.mousePos = {x: e.pageX - this.canvas.offsetLeft, y: e.pageY - this.canvas.offsetTop};
     }
 
     setKeyState(event, isOn)

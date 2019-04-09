@@ -1,5 +1,17 @@
-Verify final build
-Create postmortem
+Backup plan for "through line" bug (implement first)
+Fix "through line" bug
+License questions to Alex: derivative works? IP/game ownership
+Add coolmathgames logo on start (1 sec)
+Add site lock for coolmathgames
+Fix touch controls
+Add touch control for exiting ultra mega mode
+Sign and return License
+Fill out W-9 (quick research on this: allowed? needed? secure? trust coolmathgames with SSN?)
+Add coolmathgames API integrations
+----- Print TT from work saying this is OK
+
+----- Verify final build
+xxxxx Create postmortem
 ----- VFX on death
 ----- SFX on menu option selection / highlight
 ----- Add SFX to level start
