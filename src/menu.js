@@ -49,13 +49,14 @@ function mainMenu(deltaTime)
         prevOption = selectedOption;
     }
     
-    if (selectedOption !== -1 && aw.mouseLeftButtonJustPressed)
+    if (selectedOption !== -1 && aw.mouseLeftButtonJustUp)
     {
         difficultyMode = selectedOption;
         lives = difficultyMode === 0 ? 10 : 5;
         levelIdx = 0;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
+        aw.mouseLeftButtonJustUp = false;
         aw.ctx.shadowBlur = 0;
         aw.state = playing;
         aw.statePost = drawUI;

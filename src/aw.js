@@ -340,6 +340,7 @@ class Aw
         this.mouseRightButton = false;
         this.mouseLeftButtonJustPressed = false;
         this.mouseRightButtonJustPressed = false;
+        this.mouseLeftButtonJustUp = false;
 
         this.canvas.addEventListener("mousedown", e =>
         {
@@ -351,7 +352,7 @@ class Aw
 
         this.canvas.addEventListener("mouseup", e =>
         {
-            if (e.button === 0) { this.mouseLeftButton = false; }
+            if (e.button === 0) { this.mouseLeftButton = false; this.mouseLeftButtonJustUp = true; }
             else if (e.button === 2) { this.mouseRightButton = false; }
             e.preventDefault();
         }, true);
@@ -376,6 +377,7 @@ class Aw
         {
             this.mouseLeftButton = false;
             this.mouseLeftButtonJustPressed = false;
+            this.mouseLeftButtonJustUp = true;
             e.preventDefault();
         }, true );
 
@@ -383,6 +385,7 @@ class Aw
         {
             this.mouseLeftButton = false;
             this.mouseLeftButtonJustPressed = false
+            this.mouseLeftButtonJustUp = true;
             e.preventDefault();
         }, true );
 
@@ -445,6 +448,7 @@ class Aw
         this.mouseDelta.y = 0.0;
         this.mouseLeftButtonJustPressed = false;
         this.mouseRightButtonJustPressed = false;
+        this.mouseLeftButtonJustUp = false;
 
         Object.keys(this.keysJustPressed).forEach(key =>
         {

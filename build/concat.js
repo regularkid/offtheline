@@ -727,13 +727,14 @@ function mainMenu(deltaTime)
         prevOption = selectedOption;
     }
     
-    if (selectedOption !== -1 && aw.mouseLeftButtonJustPressed)
+    if (selectedOption !== -1 && aw.mouseLeftButtonJustUp)
     {
         difficultyMode = selectedOption;
         lives = difficultyMode === 0 ? 10 : 5;
         levelIdx = 0;
         initLevel(levelIdx);
         aw.mouseLeftButtonJustPressed = false;
+        aw.mouseLeftButtonJustUp = false;
         aw.ctx.shadowBlur = 0;
         aw.state = playing;
         aw.statePost = drawUI;
@@ -2389,6 +2390,7 @@ class Aw
         this.mouseRightButton = false;
         this.mouseLeftButtonJustPressed = false;
         this.mouseRightButtonJustPressed = false;
+        this.mouseLeftButtonJustUp = false;
 
         this.canvas.addEventListener("mousedown", e =>
         {
@@ -2400,7 +2402,7 @@ class Aw
 
         this.canvas.addEventListener("mouseup", e =>
         {
-            if (e.button === 0) { this.mouseLeftButton = false; }
+            if (e.button === 0) { this.mouseLeftButton = false; this.mouseLeftButtonJustUp = true; }
             else if (e.button === 2) { this.mouseRightButton = false; }
             e.preventDefault();
         }, true);
@@ -2425,6 +2427,7 @@ class Aw
         {
             this.mouseLeftButton = false;
             this.mouseLeftButtonJustPressed = false;
+            this.mouseLeftButtonJustUp = true;
             e.preventDefault();
         }, true );
 
@@ -2432,6 +2435,7 @@ class Aw
         {
             this.mouseLeftButton = false;
             this.mouseLeftButtonJustPressed = false
+            this.mouseLeftButtonJustUp = true;
             e.preventDefault();
         }, true );
 
@@ -2494,6 +2498,7 @@ class Aw
         this.mouseDelta.y = 0.0;
         this.mouseLeftButtonJustPressed = false;
         this.mouseRightButtonJustPressed = false;
+        this.mouseLeftButtonJustUp = false;
 
         Object.keys(this.keysJustPressed).forEach(key =>
         {
@@ -2519,10 +2524,11 @@ function init(deltaTime)
 {
     renderBackgroundSpeedLines(deltaTime);
 
-    if (aw.mouseLeftButtonJustPressed)
+    if (aw.mouseLeftButtonJustUp)
     {
         aw.state = mainMenu;
         aw.mouseLeftButtonJustPressed = false;
+        aw.mouseLeftButtonJustUp = false;
 
         aw.playNote("a", 4, 0.05, 0.0);
         aw.playNote("b", 4, 0.05, 0.05);

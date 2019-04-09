@@ -16,10 +16,11 @@ function init(deltaTime)
 {
     renderBackgroundSpeedLines(deltaTime);
 
-    if (aw.mouseLeftButtonJustPressed)
+    if (aw.mouseLeftButtonJustUp)
     {
         aw.state = mainMenu;
         aw.mouseLeftButtonJustPressed = false;
+        aw.mouseLeftButtonJustUp = false;
 
         aw.playNote("a", 4, 0.05, 0.0);
         aw.playNote("b", 4, 0.05, 0.05);
