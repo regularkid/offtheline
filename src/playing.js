@@ -3,7 +3,8 @@ function playing(deltaTime)
     aw.ctx.shadowBlur = 10;
     renderBackgroundSpeedLines(deltaTime);
 
-    if (aw.keysJustPressed["escape"] && difficultyMode === 2)
+    var doQuit = (aw.mouseLeftButtonJustUp && aw.mousePos.x >= 460.0 && aw.mousePos.y <= 50.0) || aw.keysJustPressed["escape"];
+    if (doQuit && difficultyMode === 2)
     {
         aw.clearAllEntities();
         aw.mouseLeftButtonJustPressed = false;

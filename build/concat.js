@@ -277,7 +277,7 @@ class Player
         if (!this.isDead)
         {
             this.lastLeftButtonClickedDeltaTime += deltaTime;
-            if (aw.mouseLeftButtonJustPressed || aw.keysJustPressed["space"])
+            if ((aw.mouseLeftButtonJustPressed && (aw.mousePos.x < 460.0 || aw.mousePos.y > 50.0)) || aw.keysJustPressed["space"])
             {
                 this.lastLeftButtonClickedDeltaTime = 0;
             }
@@ -614,7 +614,7 @@ function drawUI(deltaTime)
     {
         aw.ctx.shadowColor = "#08F";
         aw.drawText({text:"UNLIMITED LIVES", x:630, y:25, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
-        aw.drawText({text:"PRESS [ESC] TO QUIT", x:630, y:45, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
+        aw.drawText({text:"PRESS HERE TO QUIT", x:630, y:45, fontSize:15, fontStyle:"bold", color:"#08F", textAlign:"right"});
     }
     else
     {
@@ -745,7 +745,8 @@ function playing(deltaTime)
     aw.ctx.shadowBlur = 10;
     renderBackgroundSpeedLines(deltaTime);
 
-    if (aw.keysJustPressed["escape"] && difficultyMode === 2)
+    var doQuit = (aw.mouseLeftButtonJustUp && aw.mousePos.x >= 460.0 && aw.mousePos.y <= 50.0) || aw.keysJustPressed["escape"];
+    if (doQuit && difficultyMode === 2)
     {
         aw.clearAllEntities();
         aw.mouseLeftButtonJustPressed = false;
