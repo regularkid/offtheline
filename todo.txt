@@ -3,8 +3,8 @@ Fix "through line" bug
 License questions to Alex: derivative works? IP/game ownership
 Add coolmathgames logo on start (1 sec)
 Add site lock for coolmathgames
-Fix touch controls
-Add touch control for exiting ultra mega mode
+----- Fix touch controls
+----- Add touch control for exiting ultra mega mode
 Sign and return License
 Fill out W-9 (quick research on this: allowed? needed? secure? trust coolmathgames with SSN?)
 Add coolmathgames API integrations
