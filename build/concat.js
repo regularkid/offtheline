@@ -738,6 +738,11 @@ function mainMenu(deltaTime)
         aw.ctx.shadowBlur = 0;
         aw.state = playing;
         aw.statePost = drawUI;
+
+        if (parent !== undefined && parent.cmgGameEvent !== undefined)
+        {
+            parent.cmgGameEvent("start");
+        }
     }
 }
 function playing(deltaTime)

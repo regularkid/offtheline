@@ -85,6 +85,7 @@ gulp.task("minify_js", gulp.series("build_js", "build_html", () =>
                 warning_level: "QUIET",
                 language_in: "ECMASCRIPT6_STRICT",
                 language_out: "ECMASCRIPT5_STRICT",
+                jscomp_off: "checkVars",
                 /*output_wrapper: "(function(){\n%output%\n}).call(this)",*/
                 js_output_file: "concat.min.js"
             }))
