@@ -54,7 +54,8 @@ var sourceFiles =
 var outputFiles =
 [
     "./build/index.html",
-    "./build/concat.min.js"
+    "./build/concat.min.js",
+    "./build/CoolmathGames-640x480.png"
 ]
 
 gulp.task("build_js", () =>
