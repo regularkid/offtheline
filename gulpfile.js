@@ -70,6 +70,9 @@ gulp.task("build_html", (done) =>
         .pipe(htmlreplace({ "js": "concat.min.js" }))
         .pipe(gulp.dest("./build/"));
 
+    gulp.src("CoolmathGames-640x480.png")
+        .pipe(gulp.dest("./build/"));
+
     done();
 });
 
