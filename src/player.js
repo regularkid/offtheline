@@ -144,7 +144,7 @@ class Player
             });
 
             // Check for hitting level again
-            let intersectInfo = level.getIntersectionInfo(this.xPrev, this.yPrev, this.x, this.y);
+            let intersectInfo = level.getIntersectionInfo(this.xPrev2, this.yPrev2, this.x, this.y);
             if (intersectInfo.intersect)
             {
                 let xDist = intersectInfo.x - this.xJump;
