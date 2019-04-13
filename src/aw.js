@@ -31,6 +31,8 @@ class Aw
         this.width = width;
         this.height = height;
         this.scale = scale;
+        this.actualWidth = -1;
+        this.actualHeight = -1;
     }
 
     loadAssets(assetList)
@@ -80,6 +82,8 @@ class Aw
         
         if (this.isLoading()) { return; }
 
+        this.fitToScreen();
+
         let deltaTime = Math.min((curTime - (this.lastTime || curTime)) / 1000.0, 0.2);  // Cap to 200ms (5fps)
         this.lastTime = curTime;
 
@@ -100,6 +104,28 @@ class Aw
         }
 
         this.postUpdateInput();
+    }
+
+    fitToScreen()
+    {
+        let aspectRatio = this.canvas.width / this.canvas.height;
+        let newWidth = window.innerWidth;
+        let newHeight = window.innerWidth / aspectRatio;
+
+        if (newHeight > window.innerHeight)
+        {
+            newHeight = window.innerHeight;
+            newWidth = newHeight * aspectRatio;
+        }
+
+        if (newWidth !== this.actualWidth || newHeight !== this.actualHeight)
+        {
+            this.canvas.style.width = newWidth+"px";
+            this.canvas.style.height = newHeight+"px";
+
+            this.actualWidth = newWidth;
+            this.actualHeight = newHeight;
+        }
     }
 
     //////////////////////////
@@ -423,6 +449,8 @@ class Aw
     setTouchPos(e)
     {
         this.mousePos = {x: e.pageX - this.canvas.offsetLeft, y: e.pageY - this.canvas.offsetTop};
+        this.mousePos.x *= this.width / this.actualWidth;
+        this.mousePos.y *= this.height / this.actualHeight;
     }
 
     setKeyState(event, isOn)

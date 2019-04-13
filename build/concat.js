@@ -346,7 +346,7 @@ class Player
                 let xDist = intersectInfo.x - this.xJump;
                 let yDist = intersectInfo.y - this.yJump;
                 let sqDist = xDist*xDist + yDist*yDist;
-                if (sqDist > 5.0)
+                if (sqDist > 100.0) // > 5.0 dist
                 {
                     this.curLineDist = intersectInfo.distance;
                     this.curLevelGroup = intersectInfo.group;
@@ -2087,6 +2087,8 @@ class Aw
         this.width = width;
         this.height = height;
         this.scale = scale;
+        this.actualWidth = -1;
+        this.actualHeight = -1;
     }
 
     loadAssets(assetList)
@@ -2136,6 +2138,8 @@ class Aw
         
         if (this.isLoading()) { return; }
 
+        this.fitToScreen();
+
         let deltaTime = Math.min((curTime - (this.lastTime || curTime)) / 1000.0, 0.2);  // Cap to 200ms (5fps)
         this.lastTime = curTime;
 
@@ -2156,6 +2160,28 @@ class Aw
         }
 
         this.postUpdateInput();
+    }
+
+    fitToScreen()
+    {
+        let aspectRatio = this.canvas.width / this.canvas.height;
+        let newWidth = window.innerWidth;
+        let newHeight = window.innerWidth / aspectRatio;
+
+        if (newHeight > window.innerHeight)
+        {
+            newHeight = window.innerHeight;
+            newWidth = newHeight * aspectRatio;
+        }
+
+        if (newWidth !== this.actualWidth || newHeight !== this.actualHeight)
+        {
+            this.canvas.style.width = newWidth+"px";
+            this.canvas.style.height = newHeight+"px";
+
+            this.actualWidth = newWidth;
+            this.actualHeight = newHeight;
+        }
     }
 
     //////////////////////////
@@ -2479,6 +2505,8 @@ class Aw
     setTouchPos(e)
     {
         this.mousePos = {x: e.pageX - this.canvas.offsetLeft, y: e.pageY - this.canvas.offsetTop};
+        this.mousePos.x *= this.width / this.actualWidth;
+        this.mousePos.y *= this.height / this.actualHeight;
     }
 
     setKeyState(event, isOn)
@@ -2551,7 +2579,7 @@ for(var i = 0; i < avaiabledomains.length; i ++)
 }
 
 // Site lock
-if(!isPlayAvaiable) { aw.state = undefined; };
+//if(!isPlayAvaiable) { aw.state = undefined; };
 
 var level;
 var player;

@@ -4,7 +4,6 @@ var screenScale = 1.0;
 
 var aw = new Aw(screenWidth, screenHeight, screenScale, ["CoolmathGames-640x480.png"]);
 aw.state = splash;
-initFitToScreen();
 
 var avaiabledomains =
 [
@@ -79,24 +78,4 @@ function init(deltaTime)
     aw.ctx.shadowBlur = 20;
     aw.ctx.shadowColor = "#08F";
     aw.drawText({text:"CLICK TO PLAY", x:screenWidth*0.5, y:screenHeight*0.5, fontSize:20, fontStyle:"bold", color:"#08F", textAlign:"center"});
-}
-
-function initFitToScreen()
-{
-    let style = aw.canvas.getAttribute("style") || "";    
-    window.addEventListener("resize", () => onResize(), false);
-    onResize();
-
-    function onResize()
-    {
-        let scale = {x: 1, y: 1};
-        scale.x = (window.innerWidth - 10) / aw.canvas.width;
-        scale.y = (window.innerHeight - 10) / aw.canvas.height;
-        
-        if (scale.x < 1 || scale.y < 1) { scale = "1, 1"; }
-        else if (scale.x < scale.y) { scale = scale.x + ", " + scale.x; }
-        else { scale = scale.y + ", " + scale.y; }
-        
-        aw.canvas.setAttribute("style", style + " " + "-ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(" + scale + "); -webkit-transform: scale3d(" + scale + ", 1); -moz-transform: scale(" + scale + "); -o-transform: scale(" + scale + "); transform: scale(" + scale + ");");
-    }
 }
