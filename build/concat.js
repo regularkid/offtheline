@@ -346,7 +346,7 @@ class Player
                 let xDist = intersectInfo.x - this.xJump;
                 let yDist = intersectInfo.y - this.yJump;
                 let sqDist = xDist*xDist + yDist*yDist;
-                if (sqDist > 5.0)
+                if (sqDist > 225.0) // > 15.0 dist
                 {
                     this.curLineDist = intersectInfo.distance;
                     this.curLevelGroup = intersectInfo.group;
