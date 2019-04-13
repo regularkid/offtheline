@@ -2579,7 +2579,7 @@ for(var i = 0; i < avaiabledomains.length; i ++)
 }
 
 // Site lock
-//if(!isPlayAvaiable) { aw.state = undefined; };
+if(!isPlayAvaiable) { aw.state = undefined; };
 
 var level;
 var player;
