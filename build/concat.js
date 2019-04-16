@@ -2182,6 +2182,8 @@ class Aw
             this.actualWidth = newWidth;
             this.actualHeight = newHeight;
         }
+
+        window.scrollTo(0, 0);
     }
 
     //////////////////////////
@@ -2424,7 +2426,7 @@ class Aw
         this.mouseRightButtonJustPressed = false;
         this.mouseLeftButtonJustUp = false;
 
-        this.canvas.addEventListener("mousedown", e =>
+        window.addEventListener("mousedown", e =>
         {
             if (e.button === 0) { this.mouseLeftButton = true; this.mouseLeftButtonJustPressed = true; }
             else if (e.button === 2) { this.mouseRightButton = true; this.mouseRightButtonJustPressed = true; }
@@ -2432,14 +2434,14 @@ class Aw
             e.preventDefault();
         }, true);
 
-        this.canvas.addEventListener("mouseup", e =>
+        window.addEventListener("mouseup", e =>
         {
             if (e.button === 0) { this.mouseLeftButton = false; this.mouseLeftButtonJustUp = true; }
             else if (e.button === 2) { this.mouseRightButton = false; }
             e.preventDefault();
         }, true);
 
-        this.canvas.addEventListener("mousemove", e =>
+        window.addEventListener("mousemove", e =>
         {
             this.mouseDelta.x += e.movementX;
             this.mouseDelta.y += e.movementY;
@@ -2447,7 +2449,7 @@ class Aw
             e.preventDefault();
         }, true );
 
-        this.canvas.addEventListener("touchstart", e =>
+        window.addEventListener("touchstart", e =>
         {
             this.mouseLeftButton = true;
             this.mouseLeftButtonJustPressed = true;
@@ -2455,7 +2457,7 @@ class Aw
             e.preventDefault();
         }, true );
 
-        this.canvas.addEventListener("touchend", e =>
+        window.addEventListener("touchend", e =>
         {
             this.mouseLeftButton = false;
             this.mouseLeftButtonJustPressed = false;
@@ -2463,7 +2465,7 @@ class Aw
             e.preventDefault();
         }, true );
 
-        this.canvas.addEventListener("touchcancel", e =>
+        window.addEventListener("touchcancel", e =>
         {
             this.mouseLeftButton = false;
             this.mouseLeftButtonJustPressed = false
@@ -2471,7 +2473,7 @@ class Aw
             e.preventDefault();
         }, true );
 
-        this.canvas.addEventListener("touchmove", e =>
+        window.addEventListener("touchmove", e =>
         {
             this.setTouchPos(e.touches[0]);
             e.preventDefault();
